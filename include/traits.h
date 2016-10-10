@@ -31,7 +31,7 @@
 /*
  * Logging
  */
-extern void stream(FILE *s); 
+extern void stream(FILE *s);
 
 /*
  * Test
@@ -43,8 +43,8 @@ typedef void (*test_t)(void);
 extern void _run(const char *name, test_t test);
 #define run(_case)      _run(str(_case), test_##_case)
 
-extern void _skip(const char *name);
-#define skip(_case)     _skip(str(_case))
+extern void _skip(const char *name, test_t _);
+#define skip(_case)     _skip(str(_case), test_##_case)
 
 extern int report(void);
 
@@ -81,6 +81,9 @@ extern void _ASSERT_PTR_NOT_NULL(const void * got, const char *file, int line);
 #define OP_DECLARE(_lower, _upper, _operator)   \
     extern void _ASSERT_##_upper##_##_operator(const _lower expected, const _lower got, const char *file, int line);
 
+#define OP_COMPOUND_DECLARE(_lower, _upper, _operator)   \
+    extern void _ASSERT_##_upper##_##_operator(const _lower delta, const _lower expected, const _lower got, const char *file, int line);
+
 #define DECLARE(_lower, _upper)                 \
     OP_DECLARE(_lower, _upper, EQUAL)           \
     OP_DECLARE(_lower, _upper, NOT_EQUAL)       \
@@ -88,6 +91,7 @@ extern void _ASSERT_PTR_NOT_NULL(const void * got, const char *file, int line);
     OP_DECLARE(_lower, _upper, GREATER)         \
     OP_DECLARE(_lower, _upper, LESS_EQUAL)      \
     OP_DECLARE(_lower, _upper, LESS)            \
+    OP_COMPOUND_DECLARE(_lower, _upper, WITHIN) \
 
 DECLARE(uint8_t, UINT8)
 #define ASSERT_UINT8_EQUAL(expected, got)         _ASSERT_UINT8_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -96,6 +100,7 @@ DECLARE(uint8_t, UINT8)
 #define ASSERT_UINT8_GREATER(expected, got)       _ASSERT_UINT8_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT8_LESS_EQUAL(expected, got)    _ASSERT_UINT8_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT8_LESS(expected, got)          _ASSERT_UINT8_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT8_WITHIN(delta, expected, got) _ASSERT_UINT8_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(uint16_t, UINT16)
 #define ASSERT_UINT16_EQUAL(expected, got)         _ASSERT_UINT16_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -104,6 +109,7 @@ DECLARE(uint16_t, UINT16)
 #define ASSERT_UINT16_GREATER(expected, got)       _ASSERT_UINT16_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT16_LESS_EQUAL(expected, got)    _ASSERT_UINT16_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT16_LESS(expected, got)          _ASSERT_UINT16_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT16_WITHIN(delta, expected, got) _ASSERT_UINT16_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(uint32_t, UINT32)
 #define ASSERT_UINT32_EQUAL(expected, got)         _ASSERT_UINT32_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -112,6 +118,7 @@ DECLARE(uint32_t, UINT32)
 #define ASSERT_UINT32_GREATER(expected, got)       _ASSERT_UINT32_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT32_LESS_EQUAL(expected, got)    _ASSERT_UINT32_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT32_LESS(expected, got)          _ASSERT_UINT32_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT32_WITHIN(delta, expected, got) _ASSERT_UINT32_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(size_t, SIZE)
 #define ASSERT_SIZE_EQUAL(expected, got)         _ASSERT_SIZE_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -120,6 +127,7 @@ DECLARE(size_t, SIZE)
 #define ASSERT_SIZE_GREATER(expected, got)       _ASSERT_SIZE_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_SIZE_LESS_EQUAL(expected, got)    _ASSERT_SIZE_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_SIZE_LESS(expected, got)          _ASSERT_SIZE_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_SIZE_WITHIN(delta, expected, got) _ASSERT_SIZE_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(unsigned, UINT)
 #define ASSERT_UINT_EQUAL(expected, got)         _ASSERT_UINT_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -128,6 +136,7 @@ DECLARE(unsigned, UINT)
 #define ASSERT_UINT_GREATER(expected, got)       _ASSERT_UINT_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT_LESS_EQUAL(expected, got)    _ASSERT_UINT_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT_LESS(expected, got)          _ASSERT_UINT_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT_WITHIN(delta, expected, got) _ASSERT_UINT_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(int8_t, INT8)
 #define ASSERT_INT8_EQUAL(expected, got)         _ASSERT_INT8_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -136,6 +145,7 @@ DECLARE(int8_t, INT8)
 #define ASSERT_INT8_GREATER(expected, got)       _ASSERT_INT8_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT8_LESS_EQUAL(expected, got)    _ASSERT_INT8_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT8_LESS(expected, got)          _ASSERT_INT8_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT8_WITHIN(delta, expected, got) _ASSERT_INT8_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(int16_t, INT16)
 #define ASSERT_INT16_EQUAL(expected, got)         _ASSERT_INT16_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -144,6 +154,7 @@ DECLARE(int16_t, INT16)
 #define ASSERT_INT16_GREATER(expected, got)       _ASSERT_INT16_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT16_LESS_EQUAL(expected, got)    _ASSERT_INT16_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT16_LESS(expected, got)          _ASSERT_INT16_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT16_WITHIN(delta, expected, got) _ASSERT_INT16_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(int32_t, INT32)
 #define ASSERT_INT32_EQUAL(expected, got)         _ASSERT_INT32_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -152,6 +163,7 @@ DECLARE(int32_t, INT32)
 #define ASSERT_INT32_GREATER(expected, got)       _ASSERT_INT32_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT32_LESS_EQUAL(expected, got)    _ASSERT_INT32_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT32_LESS(expected, got)          _ASSERT_INT32_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT32_WITHIN(delta, expected, got) _ASSERT_INT32_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(int, INT)
 #define ASSERT_INT_EQUAL(expected, got)         _ASSERT_INT_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -160,6 +172,7 @@ DECLARE(int, INT)
 #define ASSERT_INT_GREATER(expected, got)       _ASSERT_INT_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT_LESS_EQUAL(expected, got)    _ASSERT_INT_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT_LESS(expected, got)          _ASSERT_INT_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT_WITHIN(delta, expected, got) _ASSERT_INT_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 #if SUPPORT_64BIT
 DECLARE(uint64_t, UINT64)
@@ -169,6 +182,7 @@ DECLARE(uint64_t, UINT64)
 #define ASSERT_UINT64_GREATER(expected, got)       _ASSERT_UINT64_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT64_LESS_EQUAL(expected, got)    _ASSERT_UINT64_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT64_LESS(expected, got)          _ASSERT_UINT64_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT64_WITHIN(delta, expected, got) _ASSERT_UINT64_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 DECLARE(int64_t, INT64)
 #define ASSERT_INT64_EQUAL(expected, got)         _ASSERT_INT64_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -177,6 +191,7 @@ DECLARE(int64_t, INT64)
 #define ASSERT_INT64_GREATER(expected, got)       _ASSERT_INT64_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT64_LESS_EQUAL(expected, got)    _ASSERT_INT64_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT64_LESS(expected, got)          _ASSERT_INT64_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT64_WITHIN(delta, expected, got) _ASSERT_INT64_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 #endif
 
 #undef OP_DECLARE
