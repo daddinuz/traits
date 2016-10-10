@@ -6,20 +6,27 @@
  *  email:  daddinuz@gmail.com
  */
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <inttypes.h>
 
 
 #ifndef __TRAITS_H__
 #define __TRAITS_H__
 
 /*
- * Preprocessor helper
+ *
  */
-#define str(x)      #x
-#define bool2str(x) ((x == 0) ? "false" : "true")
+#define SUPPORT_64BIT   UINTPTR_MAX == 0xffffffffffffffff
+
+/*
+ *
+ */
+#define str(x)          #x
+#define bool2str(x)     ((x == 0) ? "false" : "true")
 
 /*
  * Logging
@@ -38,61 +45,137 @@ typedef enum call_t {
     CALL_SKIP,
 } call_t; 
 
-extern void launch(const char* name, test_case_t ptr, call_t call);
+extern void launch(const char *name, test_case_t test, call_t call);
 
 #define run(_case)      launch(str(_case), test_##_case, CALL_RUN);
 #define skip(_case)     launch(str(_case), test_##_case, CALL_SKIP);
 
-/*
- * operators
- */
-typedef enum operator_t {
-    OPERATOR_EQUAL = 0,
-    OPERATOR_NOT_EQUAL,
-    OPERATOR_GREATER_EQUAL,
-    OPERATOR_GREATER,
-    OPERATOR_LESS_EQUAL,
-    OPERATOR_LESS,
-} operator_t;
+extern int report(void);
 
 /*
  * boolean
  */
-extern void __traits_bool(operator_t op, const bool expected, const bool got, const char *file, int line); 
+extern void _ASSERT(const bool condition, const char *file, int line);
+#define ASSERT(condition)   _ASSERT((condition), __FILE__, __LINE__)
 
-#define ASSERT(condition)       __traits_bool(OPERATOR_EQUAL, true, (condition), __FILE__, __LINE__)
-#define ASSERT_TRUE(condition)  __traits_bool(OPERATOR_EQUAL, true, (condition), __FILE__, __LINE__)
-#define ASSERT_FALSE(condition) __traits_bool(OPERATOR_EQUAL, false, (condition), __FILE__, __LINE__)
+extern void _ASSERT_TRUE(const bool got, const char *file, int line);
+#define ASSERT_TRUE(got)    _ASSERT_TRUE((got), __FILE__, __LINE__)
 
-/*
- * integer
- */
-extern void __traits_int(operator_t op, const int expected, const int got, const char *file, int line); 
-
-#define ASSERT_INT_EQUAL(expected, got)         __traits_int(OPERATOR_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_INT_NOT_EQUAL(expected, got)     __traits_int(OPERATOR_NOT_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_INT_GREATER_EQUAL(expected, got) __traits_int(OPERATOR_GREATER_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_INT_GREATER(expected, got)       __traits_int(OPERATOR_GREATER, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_INT_LESS_EQUAL(expected, got)    __traits_int(OPERATOR_LESS_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_INT_LESS(expected, got)          __traits_int(OPERATOR_LESS, (expected), (got), __FILE__, __LINE__)
-
-extern void __traits_size_t(operator_t op, const size_t expected, const size_t got, const char *file, int line);
-
-#define ASSERT_SIZE_T_EQUAL(expected, got)         __traits_size_t(OPERATOR_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_SIZE_T_NOT_EQUAL(expected, got)     __traits_size_t(OPERATOR_NOT_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_SIZE_T_GREATER_EQUAL(expected, got) __traits_size_t(OPERATOR_GREATER_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_SIZE_T_GREATER(expected, got)       __traits_size_t(OPERATOR_GREATER, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_SIZE_T_LESS_EQUAL(expected, got)    __traits_size_t(OPERATOR_LESS_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_SIZE_T_LESS(expected, got)          __traits_size_t(OPERATOR_LESS, (expected), (got), __FILE__, __LINE__)
+extern void _ASSERT_FALSE(const bool got, const char *file, int line);
+#define ASSERT_FALSE(got)   _ASSERT_FALSE((got), __FILE__, __LINE__)
 
 /*
  * pointer
  */
-extern void __traits_pointer(operator_t op, const void *const expected, const void *const got, const char *file, int line);
+extern void _ASSERT_PTR_EQUAL(const void * expected, const void * got, const char *file, int line);
+#define ASSERT_PTR_EQUAL(expected, got)     _ASSERT_PTR_EQUAL((expected), (got), __FILE__, __LINE__)
 
-#define ASSERT_POINTER_EQUAL(expected, got)     __traits_pointer(OPERATOR_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_POINTER_NOT_EQUAL(expected, got) __traits_pointer(OPERATOR_NOT_EQUAL, (expected), (got), __FILE__, __LINE__)
-#define ASSERT_POINTER_NULL(pointer)            __traits_pointer(OPERATOR_EQUAL, NULL, (pointer), __FILE__, __LINE__)
-#define ASSERT_POINTER_NOT_NULL(pointer)        __traits_pointer(OPERATOR_NOT_EQUAL, NULL, (pointer), __FILE__, __LINE__)
+extern void _ASSERT_PTR_NOT_EQUAL(const void * expected, const void * got, const char *file, int line);
+#define ASSERT_PTR_NOT_EQUAL(expected, got) _ASSERT_PTR_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+
+extern void _ASSERT_PTR_NULL(const void * got, const char *file, int line);
+#define ASSERT_PTR_NULL(pointer)            _ASSERT_PTR_NULL((pointer), __FILE__, __LINE__)
+
+extern void _ASSERT_PTR_NOT_NULL(const void * got, const char *file, int line);
+#define ASSERT_PTR_NOT_NULL(pointer)        _ASSERT_PTR_NOT_NULL((pointer), __FILE__, __LINE__)
+
+/*
+ * integer
+ */
+#define OP_DECLARE(_lower, _upper, _operator)   \
+    extern void _ASSERT_##_upper##_##_operator(const _lower expected, const _lower got, const char *file, int line);
+
+#define DECLARE(_lower, _upper)                 \
+    OP_DECLARE(_lower, _upper, EQUAL)           \
+    OP_DECLARE(_lower, _upper, NOT_EQUAL)       \
+    OP_DECLARE(_lower, _upper, GREATER_EQUAL)   \
+    OP_DECLARE(_lower, _upper, GREATER)         \
+    OP_DECLARE(_lower, _upper, LESS_EQUAL)      \
+    OP_DECLARE(_lower, _upper, LESS)            \
+
+DECLARE(uint8_t, UINT8)
+#define ASSERT_UINT8_EQUAL(expected, got)         _ASSERT_UINT8_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT8_NOT_EQUAL(expected, got)     _ASSERT_UINT8_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT8_GREATER_EQUAL(expected, got) _ASSERT_UINT8_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT8_GREATER(expected, got)       _ASSERT_UINT8_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT8_LESS_EQUAL(expected, got)    _ASSERT_UINT8_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT8_LESS(expected, got)          _ASSERT_UINT8_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(uint16_t, UINT16)
+#define ASSERT_UINT16_EQUAL(expected, got)         _ASSERT_UINT16_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT16_NOT_EQUAL(expected, got)     _ASSERT_UINT16_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT16_GREATER_EQUAL(expected, got) _ASSERT_UINT16_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT16_GREATER(expected, got)       _ASSERT_UINT16_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT16_LESS_EQUAL(expected, got)    _ASSERT_UINT16_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT16_LESS(expected, got)          _ASSERT_UINT16_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(uint32_t, UINT32)
+#define ASSERT_UINT32_EQUAL(expected, got)         _ASSERT_UINT32_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT32_NOT_EQUAL(expected, got)     _ASSERT_UINT32_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT32_GREATER_EQUAL(expected, got) _ASSERT_UINT32_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT32_GREATER(expected, got)       _ASSERT_UINT32_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT32_LESS_EQUAL(expected, got)    _ASSERT_UINT32_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT32_LESS(expected, got)          _ASSERT_UINT32_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(size_t, SIZE)
+#define ASSERT_SIZE_EQUAL(expected, got)         _ASSERT_SIZE_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_SIZE_NOT_EQUAL(expected, got)     _ASSERT_SIZE_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_SIZE_GREATER_EQUAL(expected, got) _ASSERT_SIZE_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_SIZE_GREATER(expected, got)       _ASSERT_SIZE_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_SIZE_LESS_EQUAL(expected, got)    _ASSERT_SIZE_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_SIZE_LESS(expected, got)          _ASSERT_SIZE_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(int8_t, INT8)
+#define ASSERT_INT8_EQUAL(expected, got)         _ASSERT_INT8_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT8_NOT_EQUAL(expected, got)     _ASSERT_INT8_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT8_GREATER_EQUAL(expected, got) _ASSERT_INT8_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT8_GREATER(expected, got)       _ASSERT_INT8_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT8_LESS_EQUAL(expected, got)    _ASSERT_INT8_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT8_LESS(expected, got)          _ASSERT_INT8_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(int16_t, INT16)
+#define ASSERT_INT16_EQUAL(expected, got)         _ASSERT_INT16_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT16_NOT_EQUAL(expected, got)     _ASSERT_INT16_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT16_GREATER_EQUAL(expected, got) _ASSERT_INT16_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT16_GREATER(expected, got)       _ASSERT_INT16_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT16_LESS_EQUAL(expected, got)    _ASSERT_INT16_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT16_LESS(expected, got)          _ASSERT_INT16_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(int32_t, INT32)
+#define ASSERT_INT32_EQUAL(expected, got)         _ASSERT_INT32_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT32_NOT_EQUAL(expected, got)     _ASSERT_INT32_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT32_GREATER_EQUAL(expected, got) _ASSERT_INT32_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT32_GREATER(expected, got)       _ASSERT_INT32_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT32_LESS_EQUAL(expected, got)    _ASSERT_INT32_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT32_LESS(expected, got)          _ASSERT_INT32_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(int, INT)
+#define ASSERT_INT_EQUAL(expected, got)         _ASSERT_INT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT_NOT_EQUAL(expected, got)     _ASSERT_INT_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT_GREATER_EQUAL(expected, got) _ASSERT_INT_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT_GREATER(expected, got)       _ASSERT_INT_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT_LESS_EQUAL(expected, got)    _ASSERT_INT_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_INT_LESS(expected, got)          _ASSERT_INT_LESS((expected), (got), __FILE__, __LINE__)
+
+#if SUPPORT_64BIT
+    DECLARE(uint64_t, UINT64)
+    #define ASSERT_UINT64_EQUAL(expected, got)         _ASSERT_UINT64_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_UINT64_NOT_EQUAL(expected, got)     _ASSERT_UINT64_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_UINT64_GREATER_EQUAL(expected, got) _ASSERT_UINT64_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_UINT64_GREATER(expected, got)       _ASSERT_UINT64_GREATER((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_UINT64_LESS_EQUAL(expected, got)    _ASSERT_UINT64_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_UINT64_LESS(expected, got)          _ASSERT_UINT64_LESS((expected), (got), __FILE__, __LINE__)
+
+    DECLARE(int64_t, INT64)
+    #define ASSERT_INT64_EQUAL(expected, got)         _ASSERT_INT64_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_INT64_NOT_EQUAL(expected, got)     _ASSERT_INT64_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_INT64_GREATER_EQUAL(expected, got) _ASSERT_INT64_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_INT64_GREATER(expected, got)       _ASSERT_INT64_GREATER((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_INT64_LESS_EQUAL(expected, got)    _ASSERT_INT64_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+    #define ASSERT_INT64_LESS(expected, got)          _ASSERT_INT64_LESS((expected), (got), __FILE__, __LINE__)
+#endif
+
+#undef OP_DECLARE
+#undef DECLARE
 
 #endif /** __TRAITS_H__ **/
