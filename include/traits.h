@@ -18,12 +18,12 @@
 #define __TRAITS_H__
 
 /*
- *
+ * Check system support
  */
 #define SUPPORT_64BIT   UINTPTR_MAX == 0xffffffffffffffff
 
 /*
- *
+ * Useful macros
  */
 #define str(x)          #x
 #define bool2str(x)     ((x == 0) ? "false" : "true")
@@ -36,19 +36,15 @@ extern void stream(FILE *s);
 /*
  * Test
  */
-typedef void (*test_case_t)(void);
+typedef void (*test_t)(void);
 
 #define TEST(_case)     void test_##_case()
 
-typedef enum call_t {
-    CALL_RUN,
-    CALL_SKIP,
-} call_t; 
+extern void _run(const char *name, test_t test);
+#define run(_case)      _run(str(_case), test_##_case);
 
-extern void launch(const char *name, test_case_t test, call_t call);
-
-#define run(_case)      launch(str(_case), test_##_case, CALL_RUN);
-#define skip(_case)     launch(str(_case), test_##_case, CALL_SKIP);
+extern void _skip(const char *name, test_t test);
+#define skip(_case)     _skip(str(_case), test_##_case);
 
 extern int report(void);
 

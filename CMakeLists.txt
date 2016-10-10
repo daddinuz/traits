@@ -30,17 +30,8 @@ add_library(traits "${INCLUDE_FILES}" "${SOURCE_FILES}")
 target_include_directories(traits PRIVATE "${INCLUDE_PATH}")
 
 #####
-# Examples
-###
-
-
-#####
 # Tests
 ###
 add_executable(test-traits "${TEST_PATH}/main.c")
 target_include_directories(test-traits PRIVATE "${INCLUDE_PATH}")
 target_link_libraries(test-traits traits)
-
-#####
-# Coverage
-###
