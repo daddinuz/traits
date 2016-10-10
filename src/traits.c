@@ -73,7 +73,7 @@ void launch(const char *name, test_case_t test, call_t call) {
 
 int report(void) {
     fprintf(STREAM, "\nReport:\n\t    total: % 3d\n\tsucceeded: % 3d\n\t   failed: % 3d\n\t  skipped: % 3d\n",
-            _gRun, _gRun - (_gFailed + _gSkipped), _gFailed, _gRun - _gSkipped);
+            _gRun, _gRun - (_gFailed + _gSkipped), _gFailed, _gSkipped);
     return _gFailed;
 }
 
