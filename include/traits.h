@@ -194,6 +194,7 @@ DECLARE(int64_t, INT64)
 #define ASSERT_INT64_WITHIN(delta, expected, got) _ASSERT_INT64_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 #endif
 
+#undef OP_COMPOUND_DECLARE
 #undef OP_DECLARE
 #undef DECLARE
 
