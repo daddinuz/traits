@@ -28,6 +28,7 @@ INTEGER(uint8_t , UINT8)
 INTEGER(uint16_t, UINT16)
 INTEGER(uint32_t, UINT32)
 INTEGER(size_t, SIZE)
+INTEGER(unsigned, UINT)
 INTEGER(int8_t , INT8)
 INTEGER(int16_t, INT16)
 INTEGER(int32_t, INT32)
@@ -50,6 +51,7 @@ int main() {
     run(uint16_t);
     run(uint32_t);
     run(size_t);
+    run(unsigned);
     run(int8_t);
     run(int16_t);
     run(int32_t);
@@ -68,6 +70,7 @@ int main() {
     skip(uint16_t);
     skip(uint32_t);
     skip(size_t);
+    skip(unsigned);
     skip(int8_t);
     skip(int16_t);
     skip(int32_t);

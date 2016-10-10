@@ -41,10 +41,10 @@ typedef void (*test_t)(void);
 #define TEST(_case)     void test_##_case()
 
 extern void _run(const char *name, test_t test);
-#define run(_case)      _run(str(_case), test_##_case);
+#define run(_case)      _run(str(_case), test_##_case)
 
-extern void _skip(const char *name, test_t test);
-#define skip(_case)     _skip(str(_case), test_##_case);
+extern void _skip(const char *name);
+#define skip(_case)     _skip(str(_case))
 
 extern int report(void);
 
@@ -120,6 +120,14 @@ DECLARE(size_t, SIZE)
 #define ASSERT_SIZE_GREATER(expected, got)       _ASSERT_SIZE_GREATER((expected), (got), __FILE__, __LINE__)
 #define ASSERT_SIZE_LESS_EQUAL(expected, got)    _ASSERT_SIZE_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_SIZE_LESS(expected, got)          _ASSERT_SIZE_LESS((expected), (got), __FILE__, __LINE__)
+
+DECLARE(unsigned, UINT)
+#define ASSERT_UINT_EQUAL(expected, got)         _ASSERT_UINT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT_NOT_EQUAL(expected, got)     _ASSERT_UINT_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT_GREATER_EQUAL(expected, got) _ASSERT_UINT_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT_GREATER(expected, got)       _ASSERT_UINT_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT_LESS_EQUAL(expected, got)    _ASSERT_UINT_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_UINT_LESS(expected, got)          _ASSERT_UINT_LESS((expected), (got), __FILE__, __LINE__)
 
 DECLARE(int8_t, INT8)
 #define ASSERT_INT8_EQUAL(expected, got)         _ASSERT_INT8_EQUAL((expected), (got), __FILE__, __LINE__)

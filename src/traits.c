@@ -66,7 +66,7 @@ void _run(const char *name, test_t test) {
     }
 }
 
-void _skip(const char *name, test_t test) {
+void _skip(const char *name) {
     __launch(name, NULL);
     fprintf(STREAM, COLOR_YELLOW "\t[ SKIPPED ]" COLOR_NORMAL "\n");
     __gSkipped += 1;
@@ -222,6 +222,14 @@ OP_DEFINE(size_t, SIZE, GREATER_EQUAL)
 OP_DEFINE(size_t, SIZE, GREATER)
 OP_DEFINE(size_t, SIZE, LESS_EQUAL)
 OP_DEFINE(size_t, SIZE, LESS)
+
+DEFINE(unsigned, UINT, "u")
+OP_DEFINE(unsigned, UINT, EQUAL)
+OP_DEFINE(unsigned, UINT, NOT_EQUAL)
+OP_DEFINE(unsigned, UINT, GREATER_EQUAL)
+OP_DEFINE(unsigned, UINT, GREATER)
+OP_DEFINE(unsigned, UINT, LESS_EQUAL)
+OP_DEFINE(unsigned, UINT, LESS)
 
 DEFINE(int8_t, INT8, PRId8)
 OP_DEFINE(int8_t, INT8, EQUAL)
