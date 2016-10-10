@@ -58,6 +58,8 @@ int main() {
 #ifdef SUPPORT_64BIT
     run(uint64_t);
     run(int64_t);
+    skip(uint64_t);
+    skip(int64_t);
 #endif
 
     skip(bool);
@@ -71,10 +73,5 @@ int main() {
     skip(int32_t);
     skip(int);
 
-#ifdef SUPPORT_64BIT
-    skip(uint64_t);
-    skip(int64_t);
-#endif
-    
     return report();
 }

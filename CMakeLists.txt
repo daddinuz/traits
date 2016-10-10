@@ -32,6 +32,6 @@ target_include_directories(traits PRIVATE "${INCLUDE_PATH}")
 #####
 # Tests
 ###
-add_executable(test-traits "${TEST_PATH}/main.c")
+add_executable(test-traits "${TEST_PATH}/test_traits.c")
 target_include_directories(test-traits PRIVATE "${INCLUDE_PATH}")
 target_link_libraries(test-traits traits)

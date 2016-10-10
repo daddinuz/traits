@@ -33,7 +33,7 @@ void stream(FILE *s) {
 #define COLOR_BLUE      ""
 #endif
 
-#define DUMP(file, line, message, ...)   do {                                                             \
+#define DUMP(file, line, message, ...)   do {                                                               \
         fprintf(STREAM, COLOR_YELLOW "\t\tFile: %s:%d" COLOR_NORMAL "\n\t\t\t" COLOR_NORMAL, file, line);   \
         fprintf(STREAM, message, __VA_ARGS__);                                                              \
         fputs("\n", STREAM);                                                                                \
@@ -73,8 +73,8 @@ void _skip(const char *name, test_t test) {
 }
 
 int report(void) {
-    fprintf(STREAM, "\n%11s: % 3d\n%11s: % 3d\n%11s: % 3d\n%11s: % 3d\n\n",
-            "total", __gRun, "succeeded", __gRun - (__gFailed + __gSkipped), "failed", __gFailed, "skipped", __gSkipped);
+    fprintf(STREAM, "\n%8s: % 3d\n%8s: % 3d\n%8s: % 3d\n%8s: % 3d\n\n",
+            "tests", __gRun, "success", __gRun - (__gFailed + __gSkipped), "failure", __gFailed, "skipped", __gSkipped);
     return __gFailed;
 }
 
@@ -256,7 +256,6 @@ OP_DEFINE(int, INT, LESS_EQUAL)
 OP_DEFINE(int, INT, LESS)
 
 #if SUPPORT_64BIT
-
 DEFINE(uint64_t, UINT64, PRIu64)
 OP_DEFINE(uint64_t, UINT64, EQUAL)
 OP_DEFINE(uint64_t, UINT64, NOT_EQUAL)
@@ -272,7 +271,6 @@ OP_DEFINE(int64_t, INT64, GREATER_EQUAL)
 OP_DEFINE(int64_t, INT64, GREATER)
 OP_DEFINE(int64_t, INT64, LESS_EQUAL)
 OP_DEFINE(int64_t, INT64, LESS)
-
 #endif
 
 #undef OP_DEFINE
