@@ -6,6 +6,7 @@
  *  email:  daddinuz@gmail.com
  */
 
+#include <stdarg.h>
 #include "traits.h"
 
 /*
@@ -32,6 +33,14 @@ void stream(FILE *s) {
 #define COLOR_YELLOW    ""
 #define COLOR_BLUE      ""
 #endif
+
+void notify(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    fprintf(STREAM, COLOR_YELLOW "\n===> " COLOR_NORMAL);
+    vfprintf(STREAM, format, args);
+    va_end(args);
+}
 
 #define DUMP(file, line, message, ...)   do {                                                               \
         fprintf(STREAM, COLOR_YELLOW "\t\tFile: %s:%d" COLOR_NORMAL "\n\t\t\t" COLOR_NORMAL, file, line);   \
@@ -164,21 +173,18 @@ void _ASSERT_PTR_NOT_NULL(const void *got, const char *file, int line) {
     __traits_ptr(OPERATOR_NOT_EQUAL, NULL, got, file, line);
 }
 
-/*
- * integer
- */
-#define OP_DEFINE(_lower, _upper, _operator)                                                                    \
-    void _ASSERT_##_upper##_##_operator(const _lower expected, const _lower got, const char *file, int line) {  \
-        __traits_##_lower(OPERATOR_##_operator, 0, expected, got, file, line);                                  \
+#define OP_DEFINE(_Type, _Identifier, _Operator)                                                                    \
+    void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line) {  \
+        __traits_##_Type(OPERATOR_##_Operator, 0, expected, got, file, line);                                  \
     }
 
-#define OP_COMPOUND_DEFINE(_lower, _upper, _operator)                                                                               \
-    void _ASSERT_##_upper##_##_operator(const _lower delta, const _lower expected, const _lower got, const char *file, int line) {  \
-        __traits_##_lower(OPERATOR_##_operator, delta, expected, got, file, line);                                                  \
+#define OP_COMPOUND_DEFINE(_Type, _Identifier, _Operator)                                                                               \
+    void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line) {  \
+        __traits_##_Type(OPERATOR_##_Operator, delta, expected, got, file, line);                                                  \
     }
 
-#define DEFINE(_lower, _upper, _fmt)                                                                                                                \
-    void __traits_##_lower(__operator_t op, const _lower delta, const _lower expected, const _lower got, const char *file, int line) {              \
+#define DEFINE(_Type, _Identifier, _fmt)                                                                                                                \
+    void __traits_##_Type(__operator_t op, const _Type delta, const _Type expected, const _Type got, const char *file, int line) {              \
         switch (op) {                                                                                                                               \
             case OPERATOR_EQUAL:                                                                                                                    \
                 __handle_op(OP_EQUAL(expected, got), "expected: %" _fmt ", got: %" _fmt, expected, got);                                            \
@@ -199,14 +205,17 @@ void _ASSERT_PTR_NOT_NULL(const void *got, const char *file, int line) {
                 abort();                                                                                                                            \
         }                                                                                                                                           \
     }                                                                                                                                               \
-    OP_DEFINE(_lower, _upper, EQUAL)                                                                                                                \
-    OP_DEFINE(_lower, _upper, NOT_EQUAL)                                                                                                            \
-    OP_DEFINE(_lower, _upper, GREATER_EQUAL)                                                                                                        \
-    OP_DEFINE(_lower, _upper, GREATER)                                                                                                              \
-    OP_DEFINE(_lower, _upper, LESS_EQUAL)                                                                                                           \
-    OP_DEFINE(_lower, _upper, LESS)                                                                                                                 \
-    OP_COMPOUND_DEFINE(_lower, _upper, WITHIN)
+    OP_DEFINE(_Type, _Identifier, EQUAL)                                                                                                                \
+    OP_DEFINE(_Type, _Identifier, NOT_EQUAL)                                                                                                            \
+    OP_DEFINE(_Type, _Identifier, GREATER_EQUAL)                                                                                                        \
+    OP_DEFINE(_Type, _Identifier, GREATER)                                                                                                              \
+    OP_DEFINE(_Type, _Identifier, LESS_EQUAL)                                                                                                           \
+    OP_DEFINE(_Type, _Identifier, LESS)                                                                                                                 \
+    OP_COMPOUND_DEFINE(_Type, _Identifier, WITHIN)
 
+/*
+ * Integer
+ */
 DEFINE(uint8_t, UINT8, PRIu8)
 DEFINE(uint16_t, UINT16, PRIu16)
 DEFINE(uint32_t, UINT32, PRIu32)
@@ -222,6 +231,12 @@ DEFINE(int, INT, "d")
 DEFINE(uint64_t, UINT64, PRIu64)
 DEFINE(int64_t, INT64, PRId64)
 #endif
+
+/*
+ * Floating
+ */
+DEFINE(float, FLOAT, "f")
+DEFINE(double, DOUBLE, "f")
 
 #undef OP_DEFINE
 #undef DEFINE

@@ -14,33 +14,42 @@ TEST(PTR) {
     ASSERT_PTR_NOT_NULL((void *) 1);
 }
 
-#define INTEGER(_lower, _upper)                 \
-    TEST(_upper) {                              \
-        ASSERT_##_upper##_EQUAL(0, 0);          \
-        ASSERT_##_upper##_NOT_EQUAL(1, 0);      \
-        ASSERT_##_upper##_GREATER_EQUAL(1, 1);  \
-        ASSERT_##_upper##_GREATER(0, 1);        \
-        ASSERT_##_upper##_LESS_EQUAL(0, 0);     \
-        ASSERT_##_upper##_LESS(1, 0);           \
-        ASSERT_##_upper##_WITHIN(5, 10, 5);     \
-        ASSERT_##_upper##_WITHIN(5, 10, 10);    \
-        ASSERT_##_upper##_WITHIN(5, 10, 15);    \
+#define NUMERICAL(_Type, _Identifier)                                               \
+    TEST(_Identifier) {                                                             \
+        ASSERT_##_Identifier##_EQUAL            ((_Type)0, (_Type)0);               \
+        ASSERT_##_Identifier##_NOT_EQUAL        ((_Type)1, (_Type)0);               \
+        ASSERT_##_Identifier##_GREATER_EQUAL    ((_Type)1, (_Type)1);               \
+        ASSERT_##_Identifier##_GREATER          ((_Type)0, (_Type)1);               \
+        ASSERT_##_Identifier##_LESS_EQUAL       ((_Type)0, (_Type)0);               \
+        ASSERT_##_Identifier##_LESS             ((_Type)1, (_Type)0);               \
+        ASSERT_##_Identifier##_WITHIN           ((_Type)5, (_Type)10, (_Type)5);    \
+        ASSERT_##_Identifier##_WITHIN           ((_Type)5, (_Type)10, (_Type)10);   \
+        ASSERT_##_Identifier##_WITHIN           ((_Type)5, (_Type)10, (_Type)15);   \
     }
 
-INTEGER(uint8_t , UINT8)
-INTEGER(uint16_t, UINT16)
-INTEGER(uint32_t, UINT32)
-INTEGER(size_t, SIZE)
-INTEGER(unsigned, UINT)
-INTEGER(int8_t , INT8)
-INTEGER(int16_t, INT16)
-INTEGER(int32_t, INT32)
-INTEGER(int, INT)
+/*
+ * Integer
+ */
+NUMERICAL(unsigned, UINT)
+NUMERICAL(uint8_t , UINT8)
+NUMERICAL(uint16_t, UINT16)
+NUMERICAL(uint32_t, UINT32)
+NUMERICAL(size_t, SIZE)
+NUMERICAL(int, INT)
+NUMERICAL(int8_t , INT8)
+NUMERICAL(int16_t, INT16)
+NUMERICAL(int32_t, INT32)
 
 #ifdef SUPPORT_64BIT
-    INTEGER(uint64_t, UINT64)
-    INTEGER(int64_t, INT64)
+NUMERICAL(uint64_t, UINT64)
+NUMERICAL(int64_t, INT64)
 #endif
+
+/*
+ * Floating
+ */
+NUMERICAL(float, FLOAT)
+NUMERICAL(double, DOUBLE)
 
 /*
  *
@@ -48,36 +57,36 @@ INTEGER(int, INT)
 int main() {
     stream(stdout);
 
+    /* Boolen   */
+    notify("Boolean\n");
     run(BOOL);
+
+    /* Pointers */
+    notify("Pointers\n");
     run(PTR);
+
+    /* Integers */
+    notify("Integers\n");
+    run(UINT);
     run(UINT8);
     run(UINT16);
     run(UINT32);
     run(SIZE);
-    run(UINT);
+    run(INT);
     run(INT8);
     run(INT16);
     run(INT32);
-    run(INT);
-
+    
 #ifdef SUPPORT_64BIT
+    notify("64 bits support detected\n");
     run(UINT64);
     run(INT64);
-    skip(UINT64);
-    skip(INT64);
 #endif
 
-    skip(BOOL);
-    skip(PTR);
-    skip(UINT8);
-    skip(UINT16);
-    skip(UINT32);
-    skip(SIZE);
-    skip(UINT);
-    skip(INT8);
-    skip(INT16);
-    skip(INT32);
-    skip(INT);
+    /* Floating */
+    notify("Floating\n");
+    run(FLOAT);
+    run(DOUBLE);
 
     return report();
 }

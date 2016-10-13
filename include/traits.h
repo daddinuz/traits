@@ -32,6 +32,7 @@
  * Logging
  */
 extern void stream(FILE *s);
+extern void notify(const char *format, ...);
 
 /*
  * Test
@@ -78,21 +79,24 @@ extern void _ASSERT_PTR_NOT_NULL(const void * got, const char *file, int line);
 /*
  * integer
  */
-#define OP_DECLARE(_lower, _upper, _operator)   \
-    extern void _ASSERT_##_upper##_##_operator(const _lower expected, const _lower got, const char *file, int line);
+#define OP_DECLARE(_Type, _Identifier, _Operator)   \
+    extern void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line);
 
-#define OP_COMPOUND_DECLARE(_lower, _upper, _operator)   \
-    extern void _ASSERT_##_upper##_##_operator(const _lower delta, const _lower expected, const _lower got, const char *file, int line);
+#define OP_COMPOUND_DECLARE(_Type, _Identifier, _Operator)   \
+    extern void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line);
 
-#define DECLARE(_lower, _upper)                 \
-    OP_DECLARE(_lower, _upper, EQUAL)           \
-    OP_DECLARE(_lower, _upper, NOT_EQUAL)       \
-    OP_DECLARE(_lower, _upper, GREATER_EQUAL)   \
-    OP_DECLARE(_lower, _upper, GREATER)         \
-    OP_DECLARE(_lower, _upper, LESS_EQUAL)      \
-    OP_DECLARE(_lower, _upper, LESS)            \
-    OP_COMPOUND_DECLARE(_lower, _upper, WITHIN) \
+#define DECLARE(_Type, _Identifier)                 \
+    OP_DECLARE(_Type, _Identifier, EQUAL)           \
+    OP_DECLARE(_Type, _Identifier, NOT_EQUAL)       \
+    OP_DECLARE(_Type, _Identifier, GREATER_EQUAL)   \
+    OP_DECLARE(_Type, _Identifier, GREATER)         \
+    OP_DECLARE(_Type, _Identifier, LESS_EQUAL)      \
+    OP_DECLARE(_Type, _Identifier, LESS)            \
+    OP_COMPOUND_DECLARE(_Type, _Identifier, WITHIN) \
 
+/*
+ * Integer ops
+ */
 DECLARE(uint8_t, UINT8)
 #define ASSERT_UINT8_EQUAL(expected, got)           _ASSERT_UINT8_EQUAL((expected), (got), __FILE__, __LINE__)
 #define ASSERT_UINT8_NOT_EQUAL(expected, got)       _ASSERT_UINT8_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
@@ -193,6 +197,27 @@ DECLARE(int64_t, INT64)
 #define ASSERT_INT64_LESS(expected, got)            _ASSERT_INT64_LESS((expected), (got), __FILE__, __LINE__)
 #define ASSERT_INT64_WITHIN(delta, expected, got)   _ASSERT_INT64_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 #endif
+
+/*
+ * Floating ops
+ */
+DECLARE(float, FLOAT)
+#define ASSERT_FLOAT_EQUAL(expected, got)           _ASSERT_FLOAT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_FLOAT_NOT_EQUAL(expected, got)       _ASSERT_FLOAT_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_FLOAT_GREATER_EQUAL(expected, got)   _ASSERT_FLOAT_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_FLOAT_GREATER(expected, got)         _ASSERT_FLOAT_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_FLOAT_LESS_EQUAL(expected, got)      _ASSERT_FLOAT_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_FLOAT_LESS(expected, got)            _ASSERT_FLOAT_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_FLOAT_WITHIN(delta, expected, got)   _ASSERT_FLOAT_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
+
+DECLARE(double, DOUBLE)
+#define ASSERT_DOUBLE_EQUAL(expected, got)           _ASSERT_DOUBLE_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_DOUBLE_NOT_EQUAL(expected, got)       _ASSERT_DOUBLE_NOT_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_DOUBLE_GREATER_EQUAL(expected, got)   _ASSERT_DOUBLE_GREATER_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_DOUBLE_GREATER(expected, got)         _ASSERT_DOUBLE_GREATER((expected), (got), __FILE__, __LINE__)
+#define ASSERT_DOUBLE_LESS_EQUAL(expected, got)      _ASSERT_DOUBLE_LESS_EQUAL((expected), (got), __FILE__, __LINE__)
+#define ASSERT_DOUBLE_LESS(expected, got)            _ASSERT_DOUBLE_LESS((expected), (got), __FILE__, __LINE__)
+#define ASSERT_DOUBLE_WITHIN(delta, expected, got)   _ASSERT_DOUBLE_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
 #undef OP_COMPOUND_DECLARE
 #undef OP_DECLARE
