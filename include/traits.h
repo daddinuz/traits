@@ -20,7 +20,18 @@
 /*
  * Check system support
  */
-#define SUPPORT_64BIT   UINTPTR_MAX == 0xffffffffffffffff
+#define SUPPORT_64BIT       UINTPTR_MAX == 0xffffffffffffffff
+
+/*
+ * Floating sensibility
+ */
+#ifndef FLOAT_PRECISION
+#define FLOAT_PRECISION     0.00001f
+#endif
+
+#ifndef DOUBLE_PRECISION
+#define DOUBLE_PRECISION    0.0000001f
+#endif
 
 /*
  * Useful macros
