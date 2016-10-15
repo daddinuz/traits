@@ -20,32 +20,32 @@ void stream(FILE *s) {
 
 #define STREAM ((NULL != __gStream) ? __gStream : stdout)
 
-#ifndef NO_COLOR
-#define COLOR_NORMAL    "\x1B[00m"
-#define COLOR_RED       "\x1B[31m"
-#define COLOR_GREEN     "\x1B[32m"
-#define COLOR_YELLOW    "\x1B[33m"
-#define COLOR_BLUE      "\x1B[34m"
-#else
-#define COLOR_NORMAL    ""
-#define COLOR_RED       ""
-#define COLOR_GREEN     ""
-#define COLOR_YELLOW    ""
-#define COLOR_BLUE      ""
-#endif
-
-void notify(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    fprintf(STREAM, COLOR_YELLOW "\n===> " COLOR_NORMAL);
-    vfprintf(STREAM, format, args);
-    va_end(args);
+const char* severity2color(severity_t severity) {
+    switch(severity) {
+        case SEVERITY_INFO:
+            return COLOR_GREEN;
+        case SEVERITY_WARN:
+            return COLOR_YELLOW;
+        case SEVERITY_ALERT:
+            return COLOR_RED;
+        default:
+            return COLOR_NORMAL;
+    }
 }
 
-#define DUMP(file, line, message, ...)   do {                                                               \
-        fprintf(STREAM, COLOR_YELLOW "\t\tFile: %s:%d" COLOR_NORMAL "\n\t\t\t" COLOR_NORMAL, file, line);   \
-        fprintf(STREAM, message, __VA_ARGS__);                                                              \
-        fputs("\n", STREAM);                                                                                \
+void notify(severity_t severity, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    fprintf(STREAM, "\n===> %s", severity2color(severity));
+    vfprintf(STREAM, format, args);
+    va_end(args);
+    fprintf(STREAM, COLOR_NORMAL);
+}
+
+#define DUMP(file, line, message, ...)   do {                                                       \
+        fprintf(STREAM, "\t\t%sFile: %s:%d%s\n\t\t\t", COLOR_YELLOW, file, line, COLOR_NORMAL);     \
+        fprintf(STREAM, message, __VA_ARGS__);                                                      \
+        fputs("\n", STREAM);                                                                        \
     } while(0)
 
 #define INSPECT(_Format, _Type) "%" _Format " (" str(_Type) ")"
@@ -61,7 +61,7 @@ static int __gState = EXIT_SUCCESS;
 void __launch(const char *name, test_t test) {
     __gRun += 1;
     __gState = EXIT_SUCCESS;
-    fprintf(STREAM, "Test: " COLOR_BLUE "%s" COLOR_NORMAL "...\n", name);
+    fprintf(STREAM, "Test: %s%s%s...\n", COLOR_BLUE, name, COLOR_NORMAL);
     if (NULL != test) {
         test();
     }
@@ -70,16 +70,16 @@ void __launch(const char *name, test_t test) {
 void _run(const char *name, test_t test) {
     __launch(name, test);
     if (__gState <= 0) {
-        fprintf(STREAM, COLOR_GREEN "\t[ SUCCESS ]" COLOR_NORMAL "\n");
+        fprintf(STREAM, "%s\t[ SUCCESS ]%s\n", COLOR_GREEN, COLOR_NORMAL);
     } else {
-        fprintf(STREAM, COLOR_RED "\t[ FAILURE ]" COLOR_NORMAL "\n");
+        fprintf(STREAM, "%s\t[ FAILURE ]%s\n", COLOR_RED, COLOR_NORMAL);
         __gFailed += 1;
     }
 }
 
 void _skip(const char *name, test_t _) {
     __launch(name, NULL);
-    fprintf(STREAM, COLOR_YELLOW "\t[ SKIPPED ]" COLOR_NORMAL "\n");
+    fprintf(STREAM, "%s\t[ SKIPPED ]%s\n", COLOR_YELLOW, COLOR_NORMAL);
     __gSkipped += 1;
 }
 
@@ -127,7 +127,7 @@ void __traits_bool(__operator_t op, const bool expected, const bool got, const c
         case OPERATOR_NOT_EQUAL:
             __handle_op(OP_NOT_EQUAL(expected, got), "expected: %s, got: %s", bool2str(expected), bool2str(got));
         default:
-            fprintf(stderr, COLOR_YELLOW "\t\tFile: %s:%d" COLOR_NORMAL "\n\t\t\t" COLOR_NORMAL, file, line);
+            fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);
             fprintf(stderr, "Unknown operator for 'bool'.\n");
             abort();
     }
@@ -155,7 +155,7 @@ void __traits_ptr(__operator_t op, const void *const expected, const void *const
         case OPERATOR_NOT_EQUAL:
             __handle_op(OP_NOT_EQUAL(expected, got), "expected: %p, got: %p", expected, got);
         default:
-            fprintf(stderr, COLOR_YELLOW "\t\tFile: %s:%d" COLOR_NORMAL "\n\t\t\t" COLOR_NORMAL, file, line);
+            fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);
             fprintf(stderr, "Unknown operator for 'void *'.\n");
             abort();
     }
@@ -216,7 +216,7 @@ void _ASSERT_PTR_NOT_NULL(const void *got, const char *file, int line) {
                             "expected to be in range [" INSPECT(_Format, _Type) ", " INSPECT(_Format, _Type) "], got: " INSPECT(_Format, _Type),    \
                             expected - delta, expected + delta, got);                                                                               \
             default:                                                                                                                                \
-                fprintf(stderr, COLOR_YELLOW "\t\tFile: %s:%d" COLOR_NORMAL "\n\t\t\t" COLOR_NORMAL, file, line);                                   \
+                fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);                                                \
                 fprintf(stderr, "Unknown operator for '" str(_Type) "'.\n");                                                                        \
                 abort();                                                                                                                            \
         }                                                                                                                                           \
@@ -290,7 +290,7 @@ INTEGER_DEFINE(int64_t, INT64, PRId64)
                             "expected to be in range [" INSPECT(_Format, _Type) ", " INSPECT(_Format, _Type) "], got: " INSPECT(_Format, _Type),    \
                             expected - delta, expected + delta, got);                                                                               \
             default:                                                                                                                                \
-                fprintf(stderr, COLOR_YELLOW "\t\tFile: %s:%d" COLOR_NORMAL "\n\t\t\t" COLOR_NORMAL, file, line);                                   \
+                fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);                                                \
                 fprintf(stderr, "Unknown operator for '" str(_Type) "'.\n");                                                                        \
                 abort();                                                                                                                            \
         }                                                                                                                                           \

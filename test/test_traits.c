@@ -1,3 +1,4 @@
+#define NDEBUG 1
 #include "traits.h"
 
 
@@ -57,16 +58,18 @@ NUMERICAL(double, DOUBLE)
 int main() {
     stream(stdout);
 
+    debug("Running tests...\n");
+
     /* Boolen   */
-    notify("Boolean\n");
+    message("Boolean\n");
     run(BOOL);
 
     /* Pointers */
-    notify("Pointers\n");
+    message("Pointers\n");
     run(PTR);
 
     /* Integers */
-    notify("Integers\n");
+    message("Integers\n");
     run(UINT);
     run(UINT8);
     run(UINT16);
@@ -76,15 +79,19 @@ int main() {
     run(INT8);
     run(INT16);
     run(INT32);
-    
+
 #ifdef SUPPORT_64BIT
-    notify("64 bits support detected\n");
+    info("64 bits support detected\n");
+    run(UINT64);
+    run(INT64);
+#else
+    warn("64 bits support detected\n");
     run(UINT64);
     run(INT64);
 #endif
 
     /* Floating */
-    notify("Floating\n");
+    message("Floating\n");
     run(FLOAT);
     run(DOUBLE);
 

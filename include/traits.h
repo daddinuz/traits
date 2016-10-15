@@ -42,8 +42,35 @@
 /*
  * Logging
  */
+#ifndef NO_COLOR
+#define NO_COLOR 0
+#endif
+
+#ifndef NDEBUG
+#define NDEBUG 0
+#endif
+
+#define COLOR_NORMAL    (NO_COLOR != 0) ? "" : "\x1B[00m"
+#define COLOR_RED       (NO_COLOR != 0) ? "" : "\x1B[31m"
+#define COLOR_GREEN     (NO_COLOR != 0) ? "" : "\x1B[32m"
+#define COLOR_YELLOW    (NO_COLOR != 0) ? "" : "\x1B[33m"
+#define COLOR_BLUE      (NO_COLOR != 0) ? "" : "\x1B[34m"
+
 extern void stream(FILE *s);
-extern void notify(const char *format, ...);
+
+typedef enum severity_t {
+    SEVERITY_NONE,
+    SEVERITY_INFO,
+    SEVERITY_WARN,
+    SEVERITY_ALERT,
+} severity_t;
+
+extern void notify(severity_t severity, const char *format, ...);
+#define message(format, ...)    notify(SEVERITY_NONE, format, ##__VA_ARGS__)
+#define info(format, ...)       notify(SEVERITY_INFO, format, ##__VA_ARGS__)
+#define warn(format, ...)       notify(SEVERITY_WARN, format, ##__VA_ARGS__)
+#define alert(format, ...)      notify(SEVERITY_ALERT, format, ##__VA_ARGS__)
+#define debug(format, ...)      (NDEBUG) ? ((void) 0) : notify(SEVERITY_WARN, format, ##__VA_ARGS__)
 
 /*
  * Test
@@ -90,20 +117,20 @@ extern void _ASSERT_PTR_NOT_NULL(const void * got, const char *file, int line);
 /*
  * integer
  */
-#define OP_DECLARE(_Type, _Identifier, _Operator)   \
+#define _OP_BASIC_DECLARE(_Type, _Identifier, _Operator)   \
     extern void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line);
 
-#define OP_COMPOUND_DECLARE(_Type, _Identifier, _Operator)   \
+#define _OP_DELTA_DECLARE(_Type, _Identifier, _Operator)   \
     extern void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line);
 
 #define DECLARE(_Type, _Identifier)                 \
-    OP_DECLARE(_Type, _Identifier, EQUAL)           \
-    OP_DECLARE(_Type, _Identifier, NOT_EQUAL)       \
-    OP_DECLARE(_Type, _Identifier, GREATER_EQUAL)   \
-    OP_DECLARE(_Type, _Identifier, GREATER)         \
-    OP_DECLARE(_Type, _Identifier, LESS_EQUAL)      \
-    OP_DECLARE(_Type, _Identifier, LESS)            \
-    OP_COMPOUND_DECLARE(_Type, _Identifier, WITHIN) \
+    _OP_BASIC_DECLARE(_Type, _Identifier, EQUAL)           \
+    _OP_BASIC_DECLARE(_Type, _Identifier, NOT_EQUAL)       \
+    _OP_BASIC_DECLARE(_Type, _Identifier, GREATER_EQUAL)   \
+    _OP_BASIC_DECLARE(_Type, _Identifier, GREATER)         \
+    _OP_BASIC_DECLARE(_Type, _Identifier, LESS_EQUAL)      \
+    _OP_BASIC_DECLARE(_Type, _Identifier, LESS)            \
+    _OP_DELTA_DECLARE(_Type, _Identifier, WITHIN) \
 
 /*
  * Integer ops
@@ -230,8 +257,8 @@ DECLARE(double, DOUBLE)
 #define ASSERT_DOUBLE_LESS(expected, got)            _ASSERT_DOUBLE_LESS((expected), (got), __FILE__, __LINE__)
 #define ASSERT_DOUBLE_WITHIN(delta, expected, got)   _ASSERT_DOUBLE_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
-#undef OP_COMPOUND_DECLARE
-#undef OP_DECLARE
+#undef _OP_DELTA_DECLARE
+#undef _OP_BASIC_DECLARE
 #undef DECLARE
 
 #endif /** __TRAITS_H__ **/
