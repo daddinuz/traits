@@ -20,7 +20,7 @@ void stream(FILE *s) {
 
 #define STREAM ((NULL != __gStream) ? __gStream : stdout)
 
-const char* severity2color(severity_t severity) {
+const char * severity2color(severity_t severity) {
     switch(severity) {
         case SEVERITY_INFO:
             return COLOR_GREEN;
@@ -42,10 +42,10 @@ void notify(severity_t severity, const char *format, ...) {
     fprintf(STREAM, COLOR_NORMAL);
 }
 
-#define DUMP(file, line, message, ...)   do {                                                       \
-        fprintf(STREAM, "\t\t%sFile: %s:%d%s\n\t\t\t", COLOR_YELLOW, file, line, COLOR_NORMAL);     \
-        fprintf(STREAM, message, __VA_ARGS__);                                                      \
-        fputs("\n", STREAM);                                                                        \
+#define DUMP(file, line, message, ...)   do {                                                   \
+        fprintf(STREAM, "\t%sFile: %s:%d%s\n\t\t", COLOR_YELLOW, file, line, COLOR_NORMAL);     \
+        fprintf(STREAM, message, __VA_ARGS__);                                                  \
+        fputs("\n", STREAM);                                                                    \
     } while(0)
 
 #define INSPECT(_Format, _Type) "%" _Format " (" str(_Type) ")"
@@ -123,12 +123,14 @@ typedef enum __operator_t {
 void __traits_bool(__operator_t op, const bool expected, const bool got, const char *file, int line) {
     switch (op) {
         case OPERATOR_EQUAL:
-            __handle_op(OP_EQUAL(expected, got), "expected: %s, got: %s", bool2str(expected), bool2str(got));
+            __handle_op(OP_EQUAL(expected, got),
+                        "expected: " INSPECT("s", bool) ", got: " INSPECT("s", bool), bool2str(expected), bool2str(got));
         case OPERATOR_NOT_EQUAL:
-            __handle_op(OP_NOT_EQUAL(expected, got), "expected: %s, got: %s", bool2str(expected), bool2str(got));
+            __handle_op(OP_NOT_EQUAL(expected, got),
+                        "expected not equal: " INSPECT("s", bool) ", got: " INSPECT("s", bool), bool2str(expected), bool2str(got));
         default:
-            fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);
-            fprintf(stderr, "Unknown operator for 'bool'.\n");
+            fprintf(stderr, "%s\tFile: %s:%d%s\n\t\t", COLOR_RED, file, line, COLOR_NORMAL);
+            fprintf(stderr, "Unknown operator for (" str(bool) ").\n");
             abort();
     }
 }
@@ -151,12 +153,14 @@ void _ASSERT_FALSE(const bool got, const char *file, int line) {
 void __traits_ptr(__operator_t op, const void *const expected, const void *const got, const char *file, int line) {
     switch (op) {
         case OPERATOR_EQUAL:
-            __handle_op(OP_EQUAL(expected, got), "expected: %p, got: %p", expected, got);
+            __handle_op(OP_EQUAL(expected, got),
+                        "expected: " INSPECT("p", void *) ", got: " INSPECT("p", void *), expected, got);
         case OPERATOR_NOT_EQUAL:
-            __handle_op(OP_NOT_EQUAL(expected, got), "expected: %p, got: %p", expected, got);
+            __handle_op(OP_NOT_EQUAL(expected, got),
+                        "expected not equal: " INSPECT("p", void *) ", got: " INSPECT("p", void *), expected, got);
         default:
-            fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);
-            fprintf(stderr, "Unknown operator for 'void *'.\n");
+            fprintf(stderr, "%s\tFile: %s:%d%s\n\t\t", COLOR_RED, file, line, COLOR_NORMAL);
+            fprintf(stderr, "Unknown operator for (" str(void *) ").\n");
             abort();
     }
 }
@@ -178,7 +182,33 @@ void _ASSERT_PTR_NOT_NULL(const void *got, const char *file, int line) {
 }
 
 /*
- * Integer
+ * string
+ */
+void __traits_str(__operator_t op, const char *expected, const char *got, const char *file, int line) {
+    switch (op) {
+        case OPERATOR_EQUAL:
+            __handle_op(OP_EQUAL(0, strcmp(expected, got)),
+                        "expected: \"" INSPECT("s\"", char *) ", got: \"" INSPECT("s\"", char *), expected, got);
+        case OPERATOR_NOT_EQUAL:
+            __handle_op(OP_NOT_EQUAL(0, strcmp(expected, got)),
+                        "expected not equal: \"" INSPECT("s\"", char *) ", got: \"" INSPECT("s\"", char *), expected, got);
+        default:
+            fprintf(stderr, "%s\tFile: %s:%d%s\n\t\t", COLOR_RED, file, line, COLOR_NORMAL);
+            fprintf(stderr, "Unknown operator for (" str(char *) ").\n");
+            abort();
+    }
+}
+
+void _ASSERT_STR_EQUAL(const char *expected, const char *got, const char *file, int line) {
+    __traits_str(OPERATOR_EQUAL, expected, got, file, line);
+}
+
+void _ASSERT_STR_NOT_EQUAL(const char *expected, const char *got, const char *file, int line) {
+    __traits_str(OPERATOR_NOT_EQUAL, expected, got, file, line);
+}
+
+/*
+ * integer
  */
 #define INTEGER_OP_BASIC_DEFINE(_Type, _Identifier, _Operator)                                                      \
     void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line) {   \
@@ -216,8 +246,8 @@ void _ASSERT_PTR_NOT_NULL(const void *got, const char *file, int line) {
                             "expected to be in range [" INSPECT(_Format, _Type) ", " INSPECT(_Format, _Type) "], got: " INSPECT(_Format, _Type),    \
                             expected - delta, expected + delta, got);                                                                               \
             default:                                                                                                                                \
-                fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);                                                \
-                fprintf(stderr, "Unknown operator for '" str(_Type) "'.\n");                                                                        \
+                fprintf(stderr, "%s\tFile: %s:%d%s\n\t\t", COLOR_RED, file, line, COLOR_NORMAL);                                                    \
+                fprintf(stderr, "Unknown operator for (" str(_Type) ").\n");                                                                        \
                 abort();                                                                                                                            \
         }                                                                                                                                           \
     }                                                                                                                                               \
@@ -250,7 +280,7 @@ INTEGER_DEFINE(int64_t, INT64, PRId64)
 #undef INTEGER_DEFINE
 
 /*
- * Floating
+ * floating
  */
 #define PRECISION(_String)   ((0 == strcmp("float", _String)) ? FLOAT_PRECISION : DOUBLE_PRECISION)
 
@@ -290,8 +320,8 @@ INTEGER_DEFINE(int64_t, INT64, PRId64)
                             "expected to be in range [" INSPECT(_Format, _Type) ", " INSPECT(_Format, _Type) "], got: " INSPECT(_Format, _Type),    \
                             expected - delta, expected + delta, got);                                                                               \
             default:                                                                                                                                \
-                fprintf(stderr, "%s\t\tFile: %s:%d%s\n\t\t\t", COLOR_RED, file, line, COLOR_NORMAL);                                                \
-                fprintf(stderr, "Unknown operator for '" str(_Type) "'.\n");                                                                        \
+                fprintf(stderr, "%s\tFile: %s:%d%s\n\t\t", COLOR_RED, file, line, COLOR_NORMAL);                                                    \
+                fprintf(stderr, "Unknown operator for (" str(_Type) ").\n");                                                                        \
                 abort();                                                                                                                            \
         }                                                                                                                                           \
     }                                                                                                                                               \

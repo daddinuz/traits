@@ -1,4 +1,3 @@
-#define NDEBUG 1
 #include "traits.h"
 
 
@@ -13,6 +12,11 @@ TEST(PTR) {
     ASSERT_PTR_NOT_EQUAL(NULL, (void *) 1);
     ASSERT_PTR_NULL(NULL);
     ASSERT_PTR_NOT_NULL((void *) 1);
+}
+
+TEST(STR) {
+    ASSERT_STR_EQUAL("Hello", "Hello");
+    ASSERT_STR_NOT_EQUAL("Hello", "World");
 }
 
 #define NUMERICAL(_Type, _Identifier)                                               \
@@ -58,15 +62,17 @@ NUMERICAL(double, DOUBLE)
 int main() {
     stream(stdout);
 
-    debug("Running tests...\n");
-
-    /* Boolen   */
+    /* Boolean   */
     message("Boolean\n");
     run(BOOL);
 
     /* Pointers */
     message("Pointers\n");
     run(PTR);
+
+    /* String */
+    message("String\n");
+    run(STR);
 
     /* Integers */
     message("Integers\n");
