@@ -121,20 +121,20 @@ extern void _ASSERT_STR_NOT_EQUAL(const char *expected, const char *got, const c
 /*
  * numerical ops
  */
-#define _OP_BASIC_DECLARE(_Type, _Identifier, _Operator)   \
+#define BASIC_DECLARE(_Type, _Identifier, _Operator)   \
     extern void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line);
 
-#define _OP_DELTA_DECLARE(_Type, _Identifier, _Operator)   \
+#define DELTA_DECLARE(_Type, _Identifier, _Operator)   \
     extern void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line);
 
-#define DECLARE(_Type, _Identifier)                 \
-    _OP_BASIC_DECLARE(_Type, _Identifier, EQUAL)           \
-    _OP_BASIC_DECLARE(_Type, _Identifier, NOT_EQUAL)       \
-    _OP_BASIC_DECLARE(_Type, _Identifier, GREATER_EQUAL)   \
-    _OP_BASIC_DECLARE(_Type, _Identifier, GREATER)         \
-    _OP_BASIC_DECLARE(_Type, _Identifier, LESS_EQUAL)      \
-    _OP_BASIC_DECLARE(_Type, _Identifier, LESS)            \
-    _OP_DELTA_DECLARE(_Type, _Identifier, WITHIN) \
+#define DECLARE(_Type, _Identifier)                  \
+    BASIC_DECLARE(_Type, _Identifier, EQUAL)         \
+    BASIC_DECLARE(_Type, _Identifier, NOT_EQUAL)     \
+    BASIC_DECLARE(_Type, _Identifier, GREATER_EQUAL) \
+    BASIC_DECLARE(_Type, _Identifier, GREATER)       \
+    BASIC_DECLARE(_Type, _Identifier, LESS_EQUAL)    \
+    BASIC_DECLARE(_Type, _Identifier, LESS)          \
+    DELTA_DECLARE(_Type, _Identifier, WITHIN)        \
 
 /*
  * integer
@@ -261,8 +261,8 @@ DECLARE(double, DOUBLE)
 #define ASSERT_DOUBLE_LESS(expected, got)           _ASSERT_DOUBLE_LESS((expected), (got), __FILE__, __LINE__)
 #define ASSERT_DOUBLE_WITHIN(delta, expected, got)  _ASSERT_DOUBLE_WITHIN((delta), (expected), (got), __FILE__, __LINE__)
 
-#undef _OP_DELTA_DECLARE
-#undef _OP_BASIC_DECLARE
+#undef DELTA_DECLARE
+#undef BASIC_DECLARE
 #undef DECLARE
 
 #endif /** __TRAITS_H__ **/
