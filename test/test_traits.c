@@ -1,26 +1,26 @@
-#include "traits.h"
+#include "traits/traits.h"
 
 
-TEST(BOOL) {
+Test(BOOL) {
     ASSERT(0 != 1);
     ASSERT_TRUE(true);
     ASSERT_FALSE(false);
 }
 
-TEST(PTR) {
+Test(PTR) {
     ASSERT_PTR_EQUAL(NULL, NULL);
     ASSERT_PTR_NOT_EQUAL(NULL, (void *) 1);
     ASSERT_PTR_NULL(NULL);
     ASSERT_PTR_NOT_NULL((void *) 1);
 }
 
-TEST(STR) {
+Test(STR) {
     ASSERT_STR_EQUAL("Hello", "Hello");
     ASSERT_STR_NOT_EQUAL("Hello", "World");
 }
 
 #define NUMERICAL(_Type, _Identifier)                                               \
-    TEST(_Identifier) {                                                             \
+    Test(_Identifier) {                                                             \
         ASSERT_##_Identifier##_EQUAL            ((_Type)0, (_Type)0);               \
         ASSERT_##_Identifier##_NOT_EQUAL        ((_Type)1, (_Type)0);               \
         ASSERT_##_Identifier##_GREATER_EQUAL    ((_Type)1, (_Type)1);               \
@@ -63,19 +63,15 @@ int main() {
     stream(stdout);
 
     /* Boolean   */
-    message("Boolean\n");
     run(BOOL);
 
     /* Pointers */
-    message("Pointers\n");
     run(PTR);
 
     /* String */
-    message("String\n");
     run(STR);
 
     /* Integers */
-    message("Integers\n");
     run(UINT);
     run(UINT8);
     run(UINT16);
@@ -87,17 +83,13 @@ int main() {
     run(INT32);
 
 #ifdef SUPPORT_64BIT
-    info("64 bits support detected\n");
     run(UINT64);
     run(INT64);
 #else
-    warn("64 bits support detected\n");
     run(UINT64);
     run(INT64);
 #endif
 
-    /* Floating */
-    message("Floating\n");
     run(FLOAT);
     run(DOUBLE);
 

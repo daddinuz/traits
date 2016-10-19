@@ -21,17 +21,20 @@ set(      DEPS_PATH          "${PROJECT_PATH}/deps")
 #####
 # Dependencies
 ###
-
+set(LOGGER_PATH         "${DEPS_PATH}/liblogger")
+set(LOGGER_INCLUDE_PATH "${LOGGER_PATH}/include")
+add_subdirectory("${LOGGER_PATH}")
 
 #####
 # Libraries
 ###
-add_library(traits "${INCLUDE_FILES}" "${SOURCE_FILES}")
-target_include_directories(traits PRIVATE "${INCLUDE_PATH}")
+add_library(traits "${SOURCE_FILES}")
+target_include_directories(traits PRIVATE "${INCLUDE_PATH}" "${LOGGER_INCLUDE_PATH}")
+target_link_libraries(traits logger-debug)
 
 #####
 # Tests
 ###
 add_executable(test-traits "${TEST_PATH}/test_traits.c")
-target_include_directories(test-traits PRIVATE "${INCLUDE_PATH}")
+target_include_directories(test-traits PRIVATE "${INCLUDE_PATH}" "${LOGGER_INCLUDE_PATH}")
 target_link_libraries(test-traits traits)

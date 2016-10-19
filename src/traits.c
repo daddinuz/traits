@@ -6,8 +6,9 @@
  *  email:  daddinuz@gmail.com
  */
 
-#include <stdarg.h>
-#include "traits.h"
+#include <stdlib.h>
+#include <string.h>
+#include "traits/traits.h"
 
 /*
  * Logging
@@ -20,35 +21,12 @@ void stream(FILE *s) {
 
 #define STREAM      ((NULL != __gStream) ? __gStream : stdout)
 
-const char * __severity2color(severity_t severity) {
-    switch(severity) {
-        case SEVERITY_INFO:
-            return COLOR_GREEN;
-        case SEVERITY_WARN:
-            return COLOR_YELLOW;
-        case SEVERITY_ALERT:
-            return COLOR_RED;
-        default:
-            return COLOR_NORMAL;
-    }
-}
+#define INSPECT(_Format, _Type)     "%" _Format " (" str(_Type) ")"
 
-void notify(severity_t severity, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    fprintf(STREAM, "\n===> %s", __severity2color(severity));
-    vfprintf(STREAM, format, args);
-    va_end(args);
-    fprintf(STREAM, COLOR_NORMAL);
-}
-
-#define DUMP(_File, _Line, _Message, ...)   do {                                                \
-        fprintf(STREAM, "%s  File: %s:%d%s\n    ", COLOR_YELLOW, _File, _Line, COLOR_NORMAL);   \
-        fprintf(STREAM, _Message, __VA_ARGS__);                                                 \
-        fputs("\n", STREAM);                                                                    \
+#define DUMP(_Logger, _File, _Line, _Message, ...)   do {                                   \
+        log_error(_Logger, "%s:%d\n  " _Message "\n", _File, _Line, __VA_ARGS__); \
     } while(0)
 
-#define INSPECT(_Format, _Type)     "%" _Format " (" str(_Type) ")"
 
 /*
  *
@@ -61,31 +39,44 @@ static int __gState = EXIT_SUCCESS;
 void __launch(const char *name, test_t test) {
     __gRun += 1;
     __gState = EXIT_SUCCESS;
-    fprintf(STREAM, "Test: %s%s%s...\n", COLOR_BLUE, name, COLOR_NORMAL);
+    logger_t *logger = logger_new("Test", LOG_LEVEL_DEBUG, STREAM);
     if (NULL != test) {
+        log_notice(logger, "Running '%s'\n", name);
         test();
+        if (__gState <= 0) {
+            log_info(logger, "Success\n");
+        } else {
+            log_fatal(logger, "Failed\n");
+            __gFailed += 1;
+        }
+    } else {
+        log_warning(logger, "Skipping '%s'\n", name);
+        __gSkipped += 1;
     }
+    logger_delete(&logger);
 }
 
 void _run(const char *name, test_t test) {
     __launch(name, test);
-    if (__gState <= 0) {
-        fprintf(STREAM, "%s\t[ SUCCESS ]%s\n", COLOR_GREEN, COLOR_NORMAL);
-    } else {
-        fprintf(STREAM, "%s\t[ FAILURE ]%s\n", COLOR_RED, COLOR_NORMAL);
-        __gFailed += 1;
-    }
 }
 
 void _skip(const char *name, test_t _) {
     __launch(name, NULL);
-    fprintf(STREAM, "%s\t[ SKIPPED ]%s\n", COLOR_YELLOW, COLOR_NORMAL);
-    __gSkipped += 1;
 }
 
 int report(void) {
-    fprintf(STREAM, "\n%8s: % 3d\n%8s: % 3d\n%8s: % 3d\n%8s: % 3d\n\n",
-            "tests", __gRun, "success", __gRun - (__gFailed + __gSkipped), "failure", __gFailed, "skipped", __gSkipped);
+    logger_t *logger = logger_new("Report", LOG_LEVEL_DEBUG, STREAM);
+    if (__gFailed > 0) {
+        log_fatal(logger, "%s: %d, %s: %d, %s: %d, %s: %d\n", "Tests", __gRun, "Succeeded",
+                 __gRun - (__gFailed + __gSkipped), "Failed", __gFailed, "Skipped", __gSkipped);
+    } else if (__gSkipped > 0 ) {
+        log_warning(logger, "%s: %d, %s: %d, %s: %d, %s: %d\n", "Tests", __gRun, "Succeeded",
+                   __gRun - (__gFailed + __gSkipped), "Failed", __gFailed, "Skipped", __gSkipped);
+    } else {
+        log_info(logger, "%s: %d, %s: %d, %s: %d, %s: %d\n", "Tests", __gRun, "Succeeded",
+                __gRun - (__gFailed + __gSkipped), "Failed", __gFailed, "Skipped", __gSkipped);
+    }
+    logger_delete(&logger);
     return __gFailed;
 }
 
@@ -119,7 +110,7 @@ const char * __operator2string(__operator_t operator) {
         case OPERATOR_WITHIN:
             return "to be in range";
         default:
-            return "";
+            abort();
     }
 }
 
@@ -131,37 +122,37 @@ const char * __operator2string(__operator_t operator) {
 #define EXPR_LESS(_e, _g)                 ((_g) <  (_e))
 #define EXPR_WITHIN(_d, _e, _g)           (((_g) >= ((_e) - (_d))) && ((_g) <= ((_e) + (_d))))
 
-#define __HANDLE_BASIC_OPERATOR(_Operator, _Expr, _Format, _Type, _Expected, _Got)                                                                  \
-case _Operator:                                                                                                                                     \
-    if ( ! _Expr ) {                                                                                                                                \
-        __gState += 1;                                                                                                                              \
-        DUMP(file, line, "expected %s: " INSPECT(_Format, _Type) ", got: " INSPECT(_Format, _Type), __operator2string(_Operator), _Expected, _Got); \
-    }                                                                                                                                               \
+#define __HANDLE_BASIC_OPERATOR(_Logger, _Operator, _Expr, _Format, _Type, _Expected, _Got)                                                                  \
+case _Operator:                                                                                                                                              \
+    if ( ! _Expr ) {                                                                                                                                         \
+        __gState += 1;                                                                                                                                       \
+        DUMP(_Logger, file, line, "expected %s: " INSPECT(_Format, _Type) ", got: " INSPECT(_Format, _Type), __operator2string(_Operator), _Expected, _Got); \
+    }                                                                                                                                                        \
     break
 
-#define __HANDLE_DELTA_OPERATOR(_Operator, _Expr, _Format, _Type, _Expected, _Got, _Delta)                                                          \
-case _Operator:                                                                                                                                     \
-    if ( ! _Expr ) {                                                                                                                                \
-        __gState += 1;                                                                                                                              \
-            DUMP(file, line, "expected %s: [" INSPECT(_Format, _Type) ", " INSPECT(_Format, _Type) "], got: " INSPECT(_Format, _Type),              \
-                __operator2string(_Operator), _Expected - _Delta, _Expected + _Delta, _Got);                                                        \
-    }                                                                                                                                               \
+#define __HANDLE_DELTA_OPERATOR(_Logger, _Operator, _Expr, _Format, _Type, _Expected, _Got, _Delta)                                                          \
+case _Operator:                                                                                                                                              \
+    if ( ! _Expr ) {                                                                                                                                         \
+        __gState += 1;                                                                                                                                       \
+            DUMP(_Logger, file, line, "expected %s: [" INSPECT(_Format, _Type) ", " INSPECT(_Format, _Type) "], got: " INSPECT(_Format, _Type),              \
+                __operator2string(_Operator), _Expected - _Delta, _Expected + _Delta, _Got);                                                                 \
+    }                                                                                                                                                        \
     break
 
-#define __HANDLE_WRONG_OPERATOR(_Type)                                                  \
-default:                                                                                \
-    fprintf(stderr, "%s  File: %s:%d%s\n    ", COLOR_RED, file, line, COLOR_NORMAL);    \
-    fprintf(stderr, "Unknown operator for (" str(Type) ").\n");                         \
+#define __HANDLE_WRONG_OPERATOR(_Type) \
+default:                               \
     abort()
 
 /*
  * boolean
  */
 void __traits_bool(__operator_t op, const bool expected, const bool got, const char *file, int line) {
+    logger_t *logger = logger_new("Assertion", LOG_LEVEL_DEBUG, STREAM);
     switch (op) {
-        __HANDLE_BASIC_OPERATOR(OPERATOR_EQUAL, EXPR_EQUAL(expected, got), "s", bool, bool2str(expected), bool2str(got));
+        __HANDLE_BASIC_OPERATOR(logger, OPERATOR_EQUAL, EXPR_EQUAL(expected, got), "s", bool, bool2str(expected), bool2str(got));
         __HANDLE_WRONG_OPERATOR(bool);
     }
+    logger_delete(&logger);
 }
 
 void _ASSERT(const bool condition, const char *file, int line) {
@@ -180,11 +171,13 @@ void _ASSERT_FALSE(const bool got, const char *file, int line) {
  * pointer
  */
 void __traits_ptr(__operator_t op, const void * expected, const void * got, const char *file, int line) {
+    logger_t *logger = logger_new("Assertion", LOG_LEVEL_DEBUG, STREAM);
     switch (op) {
-        __HANDLE_BASIC_OPERATOR(OPERATOR_EQUAL, EXPR_EQUAL(expected, got), "p", void *, expected, got);
-        __HANDLE_BASIC_OPERATOR(OPERATOR_NOT_EQUAL, EXPR_NOT_EQUAL(expected, got), "p", void *, expected, got);
+        __HANDLE_BASIC_OPERATOR(logger, OPERATOR_EQUAL, EXPR_EQUAL(expected, got), "p", void *, expected, got);
+        __HANDLE_BASIC_OPERATOR(logger, OPERATOR_NOT_EQUAL, EXPR_NOT_EQUAL(expected, got), "p", void *, expected, got);
         __HANDLE_WRONG_OPERATOR(void *);
     }
+    logger_delete(&logger);
 }
 
 void _ASSERT_PTR_EQUAL(const void *expected, const void *got, const char *file, int line) {
@@ -207,11 +200,13 @@ void _ASSERT_PTR_NOT_NULL(const void *got, const char *file, int line) {
  * string
  */
 void __traits_str(__operator_t op, const char *expected, const char *got, const char *file, int line) {
+    logger_t *logger = logger_new("Assertion", LOG_LEVEL_DEBUG, STREAM);
     switch (op) {
-        __HANDLE_BASIC_OPERATOR(OPERATOR_EQUAL, EXPR_EQUAL(0, strcmp(expected, got)), "s", char *, expected, got);
-        __HANDLE_BASIC_OPERATOR(OPERATOR_NOT_EQUAL, EXPR_NOT_EQUAL(0, strcmp(expected, got)), "s", char *, expected, got);
+        __HANDLE_BASIC_OPERATOR(logger, OPERATOR_EQUAL, EXPR_EQUAL(0, strcmp(expected, got)), "s", char *, expected, got);
+        __HANDLE_BASIC_OPERATOR(logger, OPERATOR_NOT_EQUAL, EXPR_NOT_EQUAL(0, strcmp(expected, got)), "s", char *, expected, got);
         __HANDLE_WRONG_OPERATOR(char *);
     }
+    logger_delete(&logger);
 }
 
 void _ASSERT_STR_EQUAL(const char *expected, const char *got, const char *file, int line) {
@@ -225,35 +220,37 @@ void _ASSERT_STR_NOT_EQUAL(const char *expected, const char *got, const char *fi
 /*
  * integer
  */
-#define INTEGER_BASIC_DEFINE(_Type, _Identifier, _Operator)                                                                          \
-    void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line) {                    \
-        __traits_##_Type(OPERATOR_##_Operator, 0, expected, got, file, line);                                                        \
+#define INTEGER_BASIC_DEFINE(_Type, _Identifier, _Operator)                                                                            \
+    void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line) {                      \
+        __traits_##_Type(OPERATOR_##_Operator, 0, expected, got, file, line);                                                          \
     }
 
-#define INTEGER_DELTA_DEFINE(_Type, _Identifier, _Operator)                                                                          \
-    void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line) { \
-        __traits_##_Type(OPERATOR_##_Operator, delta, expected, got, file, line);                                                    \
+#define INTEGER_DELTA_DEFINE(_Type, _Identifier, _Operator)                                                                            \
+    void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line) {   \
+        __traits_##_Type(OPERATOR_##_Operator, delta, expected, got, file, line);                                                      \
     }
 
-#define INTEGER_DEFINE(_Type, _Identifier, _Format)                                                                                  \
-    void __traits_##_Type(__operator_t op, const _Type delta, const _Type expected, const _Type got, const char *file, int line) {   \
-        switch (op) {                                                                                                                \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_EQUAL, EXPR_EQUAL(expected, got), _Format, _Type, expected, got);                       \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_NOT_EQUAL, EXPR_NOT_EQUAL(expected, got), _Format, _Type, expected, got);               \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_GREATER_EQUAL, EXPR_GREATER_EQUAL(expected, got), _Format, _Type, expected, got);       \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_GREATER, EXPR_GREATER(expected, got), _Format, _Type, expected, got);                   \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_LESS_EQUAL, EXPR_LESS_EQUAL(expected, got), _Format, _Type, expected, got);             \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_LESS, EXPR_LESS(expected, got), _Format, _Type, expected, got);                         \
-            __HANDLE_DELTA_OPERATOR(OPERATOR_WITHIN, EXPR_WITHIN(delta, expected, got), _Format, _Type, expected, got, delta);       \
-            __HANDLE_WRONG_OPERATOR(_Type);                                                                                          \
-        }                                                                                                                            \
-    }                                                                                                                                \
-    INTEGER_BASIC_DEFINE(_Type, _Identifier, EQUAL)                                                                                  \
-    INTEGER_BASIC_DEFINE(_Type, _Identifier, NOT_EQUAL)                                                                              \
-    INTEGER_BASIC_DEFINE(_Type, _Identifier, GREATER_EQUAL)                                                                          \
-    INTEGER_BASIC_DEFINE(_Type, _Identifier, GREATER)                                                                                \
-    INTEGER_BASIC_DEFINE(_Type, _Identifier, LESS_EQUAL)                                                                             \
-    INTEGER_BASIC_DEFINE(_Type, _Identifier, LESS)                                                                                   \
+#define INTEGER_DEFINE(_Type, _Identifier, _Format)                                                                                    \
+    void __traits_##_Type(__operator_t op, const _Type delta, const _Type expected, const _Type got, const char *file, int line) {     \
+        logger_t *logger = logger_new("Assertion", LOG_LEVEL_DEBUG, STREAM);                                                           \
+        switch (op) {                                                                                                                  \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_EQUAL, EXPR_EQUAL(expected, got), _Format, _Type, expected, got);                 \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_NOT_EQUAL, EXPR_NOT_EQUAL(expected, got), _Format, _Type, expected, got);         \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_GREATER_EQUAL, EXPR_GREATER_EQUAL(expected, got), _Format, _Type, expected, got); \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_GREATER, EXPR_GREATER(expected, got), _Format, _Type, expected, got);             \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_LESS_EQUAL, EXPR_LESS_EQUAL(expected, got), _Format, _Type, expected, got);       \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_LESS, EXPR_LESS(expected, got), _Format, _Type, expected, got);                   \
+            __HANDLE_DELTA_OPERATOR(logger, OPERATOR_WITHIN, EXPR_WITHIN(delta, expected, got), _Format, _Type, expected, got, delta); \
+            __HANDLE_WRONG_OPERATOR(_Type);                                                                                            \
+        }                                                                                                                              \
+        logger_delete(&logger);                                                                                                        \
+    }                                                                                                                                  \
+    INTEGER_BASIC_DEFINE(_Type, _Identifier, EQUAL)                                                                                    \
+    INTEGER_BASIC_DEFINE(_Type, _Identifier, NOT_EQUAL)                                                                                \
+    INTEGER_BASIC_DEFINE(_Type, _Identifier, GREATER_EQUAL)                                                                            \
+    INTEGER_BASIC_DEFINE(_Type, _Identifier, GREATER)                                                                                  \
+    INTEGER_BASIC_DEFINE(_Type, _Identifier, LESS_EQUAL)                                                                               \
+    INTEGER_BASIC_DEFINE(_Type, _Identifier, LESS)                                                                                     \
     INTEGER_DELTA_DEFINE(_Type, _Identifier, WITHIN)
 
 INTEGER_DEFINE(unsigned, UINT, "u")
@@ -281,35 +278,37 @@ INTEGER_DEFINE(int64_t, INT64, PRId64)
  */
 #define PRECISION(_StrType)   ((0 == strcmp("float", _StrType)) ? FLOAT_PRECISION : DOUBLE_PRECISION)
 
-#define FLOATING_BASIC_DEFINE(_Type, _Identifier, _Operator)                                                                                \
-    void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line) {                           \
-        __traits_##_Type(OPERATOR_##_Operator, 0, expected, got, file, line);                                                               \
+#define FLOATING_BASIC_DEFINE(_Type, _Identifier, _Operator)                                                                                        \
+    void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line) {                                   \
+        __traits_##_Type(OPERATOR_##_Operator, 0, expected, got, file, line);                                                                       \
     }
 
-#define FLOATING_DELTA_DEFINE(_Type, _Identifier, _Operator)                                                                                \
-    void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line) {        \
-        __traits_##_Type(OPERATOR_##_Operator, delta, expected, got, file, line);                                                           \
+#define FLOATING_DELTA_DEFINE(_Type, _Identifier, _Operator)                                                                                        \
+    void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line) {                \
+        __traits_##_Type(OPERATOR_##_Operator, delta, expected, got, file, line);                                                                   \
     }
 
-#define FLOATING_DEFINE(_Type, _Identifier, _Format)                                                                                        \
-    void __traits_##_Type(__operator_t op, const _Type delta, const _Type expected, const _Type got, const char *file, int line) {          \
-        switch (op) {                                                                                                                       \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_EQUAL, EXPR_WITHIN(PRECISION(str(_Type)), expected, got), _Format, _Type, expected, got);      \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_NOT_EQUAL, !EXPR_WITHIN(PRECISION(str(_Type)), expected, got), _Format, _Type, expected, got); \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_GREATER_EQUAL, EXPR_GREATER_EQUAL(expected, got), _Format, _Type, expected, got);              \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_GREATER, EXPR_GREATER(expected, got), _Format, _Type, expected, got);                          \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_LESS_EQUAL, EXPR_LESS_EQUAL(expected, got), _Format, _Type, expected, got);                    \
-            __HANDLE_BASIC_OPERATOR(OPERATOR_LESS, EXPR_LESS(expected, got), _Format, _Type, expected, got);                                \
-            __HANDLE_DELTA_OPERATOR(OPERATOR_WITHIN, EXPR_WITHIN(delta, expected, got), _Format, _Type, expected, got, delta);              \
-            __HANDLE_WRONG_OPERATOR(_Type);                                                                                                 \
-        }                                                                                                                                   \
-    }                                                                                                                                       \
-    FLOATING_BASIC_DEFINE(_Type, _Identifier, EQUAL)                                                                                        \
-    FLOATING_BASIC_DEFINE(_Type, _Identifier, NOT_EQUAL)                                                                                    \
-    FLOATING_BASIC_DEFINE(_Type, _Identifier, GREATER_EQUAL)                                                                                \
-    FLOATING_BASIC_DEFINE(_Type, _Identifier, GREATER)                                                                                      \
-    FLOATING_BASIC_DEFINE(_Type, _Identifier, LESS_EQUAL)                                                                                   \
-    FLOATING_BASIC_DEFINE(_Type, _Identifier, LESS)                                                                                         \
+#define FLOATING_DEFINE(_Type, _Identifier, _Format)                                                                                                \
+    void __traits_##_Type(__operator_t op, const _Type delta, const _Type expected, const _Type got, const char *file, int line) {                  \
+        logger_t *logger = logger_new("Assertion", LOG_LEVEL_DEBUG, STREAM);                                                                        \
+        switch (op) {                                                                                                                               \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_EQUAL, EXPR_WITHIN(PRECISION(str(_Type)), expected, got), _Format, _Type, expected, got);      \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_NOT_EQUAL, !EXPR_WITHIN(PRECISION(str(_Type)), expected, got), _Format, _Type, expected, got); \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_GREATER_EQUAL, EXPR_GREATER_EQUAL(expected, got), _Format, _Type, expected, got);              \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_GREATER, EXPR_GREATER(expected, got), _Format, _Type, expected, got);                          \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_LESS_EQUAL, EXPR_LESS_EQUAL(expected, got), _Format, _Type, expected, got);                    \
+            __HANDLE_BASIC_OPERATOR(logger, OPERATOR_LESS, EXPR_LESS(expected, got), _Format, _Type, expected, got);                                \
+            __HANDLE_DELTA_OPERATOR(logger, OPERATOR_WITHIN, EXPR_WITHIN(delta, expected, got), _Format, _Type, expected, got, delta);              \
+            __HANDLE_WRONG_OPERATOR(_Type);                                                                                                         \
+        }                                                                                                                                           \
+        logger_delete(&logger);                                                                                                                     \
+    }                                                                                                                                               \
+    FLOATING_BASIC_DEFINE(_Type, _Identifier, EQUAL)                                                                                                \
+    FLOATING_BASIC_DEFINE(_Type, _Identifier, NOT_EQUAL)                                                                                            \
+    FLOATING_BASIC_DEFINE(_Type, _Identifier, GREATER_EQUAL)                                                                                        \
+    FLOATING_BASIC_DEFINE(_Type, _Identifier, GREATER)                                                                                              \
+    FLOATING_BASIC_DEFINE(_Type, _Identifier, LESS_EQUAL)                                                                                           \
+    FLOATING_BASIC_DEFINE(_Type, _Identifier, LESS)                                                                                                 \
     FLOATING_DELTA_DEFINE(_Type, _Identifier, WITHIN)
 
 FLOATING_DEFINE(float, FLOAT, "f")

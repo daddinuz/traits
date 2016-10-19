@@ -6,12 +6,11 @@
  *  email:  daddinuz@gmail.com
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <inttypes.h>
+
+#include "logger/logger.h"
 
 
 #ifndef __TRAITS_H__
@@ -36,43 +35,21 @@
 /*
  * Useful macros
  */
-#define str(x)          #x
+#define _str(x)         #x
+#define str(x)          _str(x)
 #define bool2str(x)     ((x == 0) ? "false" : "true")
 
 /*
  * Logging
  */
-#ifndef NO_COLOR
-#define NO_COLOR 0
-#endif
-
-#define COLOR_NORMAL    (NO_COLOR != 0) ? "" : "\x1B[00m"
-#define COLOR_RED       (NO_COLOR != 0) ? "" : "\x1B[31m"
-#define COLOR_GREEN     (NO_COLOR != 0) ? "" : "\x1B[32m"
-#define COLOR_YELLOW    (NO_COLOR != 0) ? "" : "\x1B[33m"
-#define COLOR_BLUE      (NO_COLOR != 0) ? "" : "\x1B[34m"
-
 extern void stream(FILE *s);
-
-typedef enum severity_t {
-    SEVERITY_NONE,
-    SEVERITY_INFO,
-    SEVERITY_WARN,
-    SEVERITY_ALERT,
-} severity_t;
-
-extern void notify(severity_t severity, const char *format, ...);
-#define message(format, ...)    notify(SEVERITY_NONE, format, ##__VA_ARGS__)
-#define info(format, ...)       notify(SEVERITY_INFO, format, ##__VA_ARGS__)
-#define warn(format, ...)       notify(SEVERITY_WARN, format, ##__VA_ARGS__)
-#define alert(format, ...)      notify(SEVERITY_ALERT, format, ##__VA_ARGS__)
 
 /*
  * Test
  */
 typedef void (*test_t)(void);
 
-#define TEST(_case)     void test_##_case()
+#define Test(_case)     void test_##_case()
 
 extern void _run(const char *name, test_t test);
 #define run(_case)      _run(str(_case), test_##_case)
