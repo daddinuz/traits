@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /*
- * logger_level_t declaration
+ * log_level_t declaration
  */
 typedef enum log_level_t {
     LOG_LEVEL_DEBUG = 0,
@@ -37,15 +37,37 @@ typedef enum log_level_t {
 } log_level_t;
 
 /*
- * logger_t declaration
+ * log_mode_t declaration
+ */
+typedef enum log_mode_t {
+    LOG_MODE_WRITE = 0,
+    LOG_MODE_APPEND,
+} log_mode_t;
+
+/*
+ * logger_t opaque struct declaration
  */
 typedef struct logger_t logger_t;
 
-extern logger_t * logger_new(const char *identifier, log_level_t level, FILE *stream);
+/*
+ * stream logger constructor
+ */
+extern logger_t * stream_logger_new(const char *identifier, log_level_t level, FILE *stream);
+
+/*
+ * file logger constructors
+ */
+extern logger_t * file_logger_new(const char *identifier, log_level_t level, const char *filepath, log_mode_t mode);
+extern logger_t * rotating_logger_new(const char *identifier, log_level_t level, const char *filepath, size_t bytes);
+extern logger_t * buffer_logger_new(const char *identifier, log_level_t level, const char *filepath, log_mode_t mode, size_t bytes);
+
+/*
+ * common loggers destructor
+ */
 extern void logger_delete(logger_t **logger);
 
 /*
- * log function declaration
+ * loggin functions
  */
 extern void log_debug   (logger_t *logger, const char *format, ...);
 extern void log_notice  (logger_t *logger, const char *format, ...);
