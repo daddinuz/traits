@@ -1,3 +1,3 @@
 # Traits
 
-Quick and dirty unit test for C code.
+An Unit Test Framework for C.
