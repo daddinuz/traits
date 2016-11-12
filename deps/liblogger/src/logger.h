@@ -2,7 +2,7 @@
  *  C Header File
  *
  *  Author: Davide Di Carlo
- *  Date:   Octorber 19, 2016
+ *  Date:   October 19, 2016
  *  email:  daddinuz@gmail.com
  */
 
@@ -33,7 +33,7 @@ typedef enum log_level_t {
     LOG_LEVEL_INFO,
     LOG_LEVEL_WARNING,
     LOG_LEVEL_ERROR,
-    LOG_LEVEL_FATAL,
+    LOG_LEVEL_FATAL
 } log_level_t;
 
 /*
@@ -41,7 +41,7 @@ typedef enum log_level_t {
  */
 typedef enum log_mode_t {
     LOG_MODE_WRITE = 0,
-    LOG_MODE_APPEND,
+    LOG_MODE_APPEND
 } log_mode_t;
 
 /*
@@ -57,9 +57,9 @@ extern logger_t * stream_logger_new(const char *identifier, log_level_t level, F
 /*
  * file logger constructors
  */
-extern logger_t * file_logger_new(const char *identifier, log_level_t level, const char *filepath, log_mode_t mode);
-extern logger_t * rotating_logger_new(const char *identifier, log_level_t level, const char *filepath, size_t bytes);
-extern logger_t * buffer_logger_new(const char *identifier, log_level_t level, const char *filepath, log_mode_t mode, size_t bytes);
+extern logger_t * file_logger_new(const char *identifier, log_level_t level, const char *file_path, log_mode_t mode);
+extern logger_t * rotating_logger_new(const char *identifier, log_level_t level, const char *file_path, size_t bytes);
+extern logger_t * buffer_logger_new(const char *identifier, log_level_t level, const char *file_path, log_mode_t mode, size_t bytes);
 
 /*
  * common loggers destructor
@@ -67,7 +67,7 @@ extern logger_t * buffer_logger_new(const char *identifier, log_level_t level, c
 extern void logger_delete(logger_t **logger);
 
 /*
- * loggin functions
+ * logging functions
  */
 extern void log_debug   (logger_t *logger, const char *format, ...);
 extern void log_notice  (logger_t *logger, const char *format, ...);

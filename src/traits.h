@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#include "logger/logger.h"
+#include "logger.h"
 
 
 #ifndef __TRAITS_H__
@@ -40,11 +40,6 @@
 #define bool2str(x)     ((x == 0) ? "false" : "true")
 
 /*
- * Logging
- */
-extern void stream(FILE *s);
-
-/*
  * Test
  */
 typedef void (*test_t)(void);
@@ -54,8 +49,8 @@ typedef void (*test_t)(void);
 extern void _run(const char *name, test_t test);
 #define run(_case)      _run(str(_case), test_##_case)
 
-extern void _skip(const char *name, test_t _);
-#define skip(_case)     _skip(str(_case), test_##_case)
+extern void _skip(const char *name);
+#define skip(_case)     _skip(str(_case))
 
 extern int report(void);
 
@@ -98,10 +93,10 @@ extern void _ASSERT_STR_NOT_EQUAL(const char *expected, const char *got, const c
 /*
  * numerical ops
  */
-#define BASIC_DECLARE(_Type, _Identifier, _Operator)   \
+#define BASIC_DECLARE(_Type, _Identifier, _Operator) \
     extern void _ASSERT_##_Identifier##_##_Operator(const _Type expected, const _Type got, const char *file, int line);
 
-#define DELTA_DECLARE(_Type, _Identifier, _Operator)   \
+#define DELTA_DECLARE(_Type, _Identifier, _Operator) \
     extern void _ASSERT_##_Identifier##_##_Operator(const _Type delta, const _Type expected, const _Type got, const char *file, int line);
 
 #define DECLARE(_Type, _Identifier)                  \

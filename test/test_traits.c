@@ -1,4 +1,4 @@
-#include "traits/traits.h"
+#include "traits.h"
 
 
 Test(Bool) {
@@ -19,29 +19,29 @@ Test(String) {
     ASSERT_STR_NOT_EQUAL("Hello", "World");
 }
 
-#define NUMERICAL(_TestCase, _Type, _Identifier)                                    \
-    Test(_TestCase) {                                                               \
-        ASSERT_##_Identifier##_EQUAL            ((_Type)0, (_Type)0);               \
-        ASSERT_##_Identifier##_NOT_EQUAL        ((_Type)1, (_Type)0);               \
-        ASSERT_##_Identifier##_GREATER_EQUAL    ((_Type)1, (_Type)1);               \
-        ASSERT_##_Identifier##_GREATER          ((_Type)0, (_Type)1);               \
-        ASSERT_##_Identifier##_LESS_EQUAL       ((_Type)0, (_Type)0);               \
-        ASSERT_##_Identifier##_LESS             ((_Type)1, (_Type)0);               \
-        ASSERT_##_Identifier##_WITHIN           ((_Type)5, (_Type)10, (_Type)5);    \
-        ASSERT_##_Identifier##_WITHIN           ((_Type)5, (_Type)10, (_Type)10);   \
-        ASSERT_##_Identifier##_WITHIN           ((_Type)5, (_Type)10, (_Type)15);   \
+#define NUMERICAL(_TestCase, _Type, _Identifier)                                      \
+    Test(_TestCase) {                                                                 \
+        ASSERT_##_Identifier##_EQUAL            ((_Type) 0, (_Type) 0);               \
+        ASSERT_##_Identifier##_NOT_EQUAL        ((_Type) 1, (_Type) 0);               \
+        ASSERT_##_Identifier##_GREATER_EQUAL    ((_Type) 1, (_Type) 1);               \
+        ASSERT_##_Identifier##_GREATER          ((_Type) 0, (_Type) 1);               \
+        ASSERT_##_Identifier##_LESS_EQUAL       ((_Type) 0, (_Type) 0);               \
+        ASSERT_##_Identifier##_LESS             ((_Type) 1, (_Type) 0);               \
+        ASSERT_##_Identifier##_WITHIN           ((_Type) 5, (_Type) 10, (_Type) 5);   \
+        ASSERT_##_Identifier##_WITHIN           ((_Type) 5, (_Type) 10, (_Type) 10);  \
+        ASSERT_##_Identifier##_WITHIN           ((_Type) 5, (_Type) 10, (_Type) 15);  \
     }
 
 /*
  * Integer
  */
 NUMERICAL(UInt, unsigned, UINT)
-NUMERICAL(UInt8, uint8_t , UINT8)
+NUMERICAL(UInt8, uint8_t, UINT8)
 NUMERICAL(UInt16, uint16_t, UINT16)
 NUMERICAL(UInt32, uint32_t, UINT32)
 NUMERICAL(SizeT, size_t, SIZE)
 NUMERICAL(Int, int, INT)
-NUMERICAL(Int8, int8_t , INT8)
+NUMERICAL(Int8, int8_t, INT8)
 NUMERICAL(Int16, int16_t, INT16)
 NUMERICAL(Int32, int32_t, INT32)
 
@@ -60,9 +60,6 @@ NUMERICAL(Double, double, DOUBLE)
  *
  */
 int main() {
-    /* Set default stream for Traits output */
-    stream(stdout);
-
     /* Boolean  */
     run(Bool);
 
@@ -84,12 +81,12 @@ int main() {
     run(Int32);
 
     (SUPPORT_64BIT) ? ({
-            run(UInt64);
-            run(Int64);
-        }) : ({
-            skip(UInt64);
-            skip(Int64);
-        });
+        run(UInt64);
+        run(Int64);
+    }) : ({
+        skip(UInt64);
+        skip(Int64);
+    });
 
     run(Float);
     run(Double);

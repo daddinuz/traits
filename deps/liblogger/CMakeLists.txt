@@ -1,50 +1,58 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 project(liblogger)
+
+
+if (DISABLE_COLORS)
+    message(STATUS "Using colors: false")
+    set(NO_COLORS_FLAG 1)
+else ()
+    message(STATUS "Using colors: true")
+    set(NO_COLORS_FLAG 0)
+endif ()
+set(CMAKE_C_FLAGS "-std=c89 -Wall -Wextra -DNCOLOR=${NO_COLORS_FLAG}")
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
 #####
-# Defines
+# Project structure
 ###
-set(      PROJECT_PATH       "${PROJECT_SOURCE_DIR}")
-set(      INCLUDE_PATH       "${PROJECT_PATH}/include")
-set(      SOURCE_PATH        "${PROJECT_PATH}/src")
-file(GLOB INCLUDE_FILES      "${INCLUDE_PATH}/*.h")
-file(GLOB SOURCE_FILES       "${SOURCE_PATH}/*.c")
+set(PROJECT_PATH "${PROJECT_SOURCE_DIR}")
+set(SOURCE_PATH "${PROJECT_PATH}/src")
+file(GLOB SOURCE_FILES "${SOURCE_PATH}/*.c")
 
-set(      EXAMPLE_PATH       "${PROJECT_PATH}/examples")
-set(      TEST_PATH          "${PROJECT_PATH}/test")
-set(      DEPS_PATH          "${PROJECT_PATH}/deps")
+set(DEPS_PATH "${PROJECT_PATH}/deps")
+set(TEST_PATH "${PROJECT_PATH}/test")
+set(EXAMPLE_PATH "${PROJECT_PATH}/examples")
 
 #####
 # Dependencies
 ###
+set(DEPS_LIST "")
 function(add_dependency TARGET PATH)
     file(GLOB FILES "${PATH}/*.c" "${PATH}/*.h")
     add_library("${TARGET}" "${FILES}")
+    set(DEPS_LIST ${DEPS_LIST} ${TARGET} PARENT_SCOPE)
 endfunction()
+include_directories("${DEPS_PATH}")
 
-set(ANSICOLOR_W32_PATH  "${DEPS_PATH}/ansicolor-w32")
-add_dependency(ansicolor-w32    "${ANSICOLOR_W32_PATH}")
+add_dependency(ansicolor-w32 "${DEPS_PATH}/ansicolor-w32")
+add_dependency(extname "${DEPS_PATH}/extname")
 
 #####
 # Library
 ###
 add_library(logger "${SOURCE_FILES}")
-target_include_directories(logger PRIVATE "${INCLUDE_PATH}" "${ANSICOLOR_W32_PATH}")
-target_compile_definitions(logger PRIVATE NDEBUG=1 NCOLOR=1)
-target_link_libraries(logger ansicolor-w32)
-
-add_library(logger-debug "${SOURCE_FILES}")
-target_include_directories(logger-debug PRIVATE "${INCLUDE_PATH}" "${ANSICOLOR_W32_PATH}")
-target_compile_definitions(logger-debug PRIVATE)
-target_link_libraries(logger-debug ansicolor-w32)
+target_link_libraries(logger "${DEPS_LIST}")
 
 #####
 # Examples
 ###
-add_executable(logger-example "${EXAMPLE_PATH}/example.c")
-target_include_directories(logger-example PRIVATE "${INCLUDE_PATH}")
-target_link_libraries(logger-example logger-debug)
+option(BUILD_EXAMPLES "Build examples" OFF)
+
+if (BUILD_EXAMPLES)
+    add_executable(example "${EXAMPLE_PATH}/example.c")
+    target_include_directories(example PRIVATE "${SOURCE_PATH}")
+    target_link_libraries(example logger)
+endif ()
