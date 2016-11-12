@@ -5,9 +5,7 @@ An Unit Test Framework written in ANSI C.
 
 ## Installation
 
-Traits uses cmake as its default building system, so **cmake 3.0 or higher
-is required** if you don't want to build the library by yourself.
-
+Traits uses cmake as its default building system, so **cmake 3.0 or higher is required** in order to build.  
 When the requirements are satisfied follow the following steps:
 
 ```bash
@@ -44,7 +42,7 @@ Test(TestCase) {
 
 ### Running tests
 
-Traits does not register tests automatically, so each Test is run using the macro `run` in your `main` function.
+Traits does not register tests automatically, so each Test is run using the macro `run` in your `main` function.  
 This macro performs necessary setup before the test is called and handles cleanup and result tabulation afterwards.
 
 So suppose you have declare a test named '*foo*':
@@ -62,7 +60,7 @@ int main(void) {
 }
 ```
 
-Sometimes you may want to skip a test because of code refactoring or for some other reason.
+Sometimes you may want to skip a test because of code refactoring or for some other reason.  
 At these times, `skip` can be called instead of `run`, control will immediately be returned
 to the caller of the test, and no failures will be returned.
 
@@ -90,18 +88,9 @@ int main(void) {
 
 ```C
 ASSERT_TRUE(condition)
-```
-Evaluates whatever code is in condition and fails if it evaluates to false
-
-```C
 ASSERT_FALSE(condition)
-```
-Evaluates whatever code is in condition and fails if it evaluates to true
-
-```C
 ASSERT(condition)
 ```
-Another way of calling ASSERT_TRUE
 
 #### Integers
 
