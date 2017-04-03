@@ -1,0 +1,15 @@
+{
+  "name": "Traits",
+  "version": "1.0.0",
+  "repo": "daddinuz/Traits",
+  "description": "Generic assertions macros written in ISO C.",
+  "keywords": [
+    "macros",
+    "assert",
+    "assertions"
+  ],
+  "license": "MIT",
+  "src": [
+    "Traits.h"
+  ]
+}

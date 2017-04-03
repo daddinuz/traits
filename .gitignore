@@ -1,19 +1,56 @@
-*.swp
-*.idea
+# Dependencies
+deps/
 
-lib/*
-!lib/.keep
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
 
-bin/*
-!bin/.keep
+# Precompiled Headers
+*.gch
+*.pch
 
-coverage/*
-!coverage/.keep
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
 
-build/*
-!build/.keep
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
 
-CMakeFiles/
-Makefile
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+
+# CMake
 CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
 cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+!bin/.keep
+bin/*
+!lib/.keep
+lib/*
+build/
+coverage/
+cmake-build-debug/
+
+# IDEs and editors
+*.idea
+*.swp
