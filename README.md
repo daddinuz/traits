@@ -28,8 +28,10 @@ int main() {
 where `_Case` must match a test case previously declared using `TRAITS`.
 
 ***Notice***:
-- before every test `traits_run` will call a function (that must be implemented by the user) which signature is: `void traits_setup(void);`
-- after every test `traits_run` will call a function (that must be implemented by the user) which signature is: `void traits_teardown(void);`
+- before every test `traits_run` will call a function (that must be implemented by the user) which signature is:  
+  `void traits_setup(void);`
+- after every test `traits_run` will call a function (that must be implemented by the user) which signature is:  
+  `void traits_teardown(void);`
 
 ## Assertion Summary
 
