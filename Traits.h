@@ -14,29 +14,31 @@
 #ifndef __TRAITS_H__
 #define __TRAITS_H__
 
-#define TRAITS_VERSION "1.0.0"
+#define TRAITS_VERSION "1.1.0"
 
+/*
+ * Useful macros
+ */
 #define __traits_stringify(x)   #x
 #define traits_stringify(x)     __traits_stringify(x)
 
-#define __traits_log(_File, _Line, _Message, ...)                       \
-    fprintf(stderr, "At %s:%d\n" _Message "\n", _File, _Line, __VA_ARGS__)
-
-#define __traits_assert(_Expression, _Message, ...)                     \
-    do {                                                                \
-        const bool actual = (_Expression);                              \
-        if (!actual) {                                                  \
-            __traits_log(__FILE__, __LINE__, _Message, __VA_ARGS__);    \
-           abort();                                                     \
-        }                                                               \
+/*
+ * Assertions framework
+ */
+#define __traits_assert(_Expression, ...)                                                       \
+    do {                                                                                        \
+        if (!(_Expression)) {                                                                   \
+            fprintf(stderr, "At " __FILE__ ":" traits_stringify(__LINE__) "\n" __VA_ARGS__);    \
+            abort();                                                                            \
+        }                                                                                       \
     } while (false)
 
 /*
  * Boolean
  */
 #define assert(_Expression)                             __traits_assert((_Expression), "expected %s", traits_stringify(_Expression))
-#define assert_true(_Expression)                        __traits_assert(true == (_Expression), "expected %s to be true", traits_stringify(_Expression))
-#define assert_false(_Expression)                       __traits_assert(false == (_Expression), "expected %s to be false", traits_stringify(_Expression))
+#define assert_true(_Expression)                        __traits_assert(true == (_Expression), "expected to be true")
+#define assert_false(_Expression)                       __traits_assert(false == (_Expression), "expected to be false")
 
 /*
  * Numerical
@@ -59,5 +61,28 @@
  */
 #define assert_string_equal(_Expected, _Actual)         __traits_assert(0 == strcmp((_Expected), (_Actual)), "expected \"%s\" to be equal to \"%s\"", _Actual, _Expected)
 #define assert_string_not_equal(_Expected, _Actual)     __traits_assert(0 != strcmp((_Expected), (_Actual)), "expected \"%s\" to not be equal to \"%s\"", _Actual, _Expected)
+
+/*
+ * Test Framework
+ */
+extern void traits_setup(void);                                     /* Must be implemented by the user */
+extern void traits_teardown(void);                                  /* Must be implemented by the user */
+
+#define TRAITS(_Case)                                               \
+    void test_##_Case(void)
+
+#define traits_run(_Case)                                           \
+    do {                                                            \
+        printf("Running: " traits_stringify(_Case) "... ");         \
+        traits_setup();                                             \
+        test_##_Case();                                             \
+        traits_teardown();                                          \
+        puts("done");                                               \
+    } while (false)
+
+#define traits_skip(_Case)                                          \
+    do {                                                            \
+        puts("Skipping: " traits_stringify(_Case) "... done");      \
+    } while (false)
 
 #endif /* __TRAITS_H__ */
