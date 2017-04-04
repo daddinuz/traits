@@ -1,7 +1,7 @@
 Traits
 ======
 
-An unit test framework written in ISO C (C99).
+A light-weight unit test framework written in ISO C (C99).
 
 ## Framework Overview
 

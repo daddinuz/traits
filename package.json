@@ -4,9 +4,10 @@
   "repo": "daddinuz/Traits",
   "description": "Generic assertions macros written in ISO C.",
   "keywords": [
-    "macros",
-    "assert",
-    "assertions"
+    "test",
+    "test-framework",
+    "assertions",
+    "assertion-library"
   ],
   "license": "MIT",
   "src": [
