@@ -14,18 +14,10 @@ endif ()
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 #####
-# Archive
-###
-file(GLOB HEADER_FILES ${PROJECT_SOURCE_DIR}/src/*.h)
-file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
-add_library(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
-
-#####
 # Examples
 ###
 file(GLOB EXAMPLE_SOURCES ${PROJECT_SOURCE_DIR}/examples/*.c)
 foreach (source_file ${EXAMPLE_SOURCES})
     get_filename_component(target ${source_file} NAME_WE)
-    add_executable(${target} ${source_file})
-    target_link_libraries(${target} PRIVATE ${PROJECT_NAME})
+    add_executable(${target} src/traits.h ${source_file})
 endforeach (source_file ${EXAMPLE_SOURCES})
