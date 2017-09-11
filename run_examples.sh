@@ -3,7 +3,7 @@
 set -e
 shopt -s extglob
 
-for e in example_!(*fail); do
+for e in example!(*fail); do
     echo -e "\n# Running: ${e}";
     ./${e};
 done
