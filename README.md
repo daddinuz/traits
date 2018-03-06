@@ -54,6 +54,13 @@ assert_null(x);
 assert_not_null(x);
 ```
 
+#### Memory
+
+```C
+assert_memory_equal(s, e, a);
+assert_memory_not_equal(s, e, a);
+```
+
 #### String
 
 ```C

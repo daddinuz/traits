@@ -1,12 +1,35 @@
 /*
- * C Source File
- *
  * Author: daddinuz
  * email:  daddinuz@gmail.com
- * Date:   September 02, 2017
+ *
+ * Copyright (c) 2018 Davide Di Carlo
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "traits.h"
+
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 /*
  *
@@ -79,6 +102,18 @@ int main() {
         int tmp = 0;
         assert_not_null(&tmp);
         assert_not_null(&tmp, "My amazing %s assertion message%c", "formatted", '!');
+    }
+
+    /* Memory */
+    {
+        const char e[] = "Hel\0lo!", a[] = "Hel\0lo";
+        assert_memory_equal(min(sizeof(e), sizeof(a)) - 1, e, a);
+        assert_memory_equal(min(sizeof(e), sizeof(a)) - 1, e, a, "My amazing %s assertion message%c", "formatted", '!');
+    }
+    {
+        const char e[] = "Hel\0lo!", a[] = "hel\0lo";
+        assert_memory_not_equal(min(sizeof(e), sizeof(a)) - 1, e, a);
+        assert_memory_not_equal(min(sizeof(e), sizeof(a)) - 1, e, a, "My amazing %s assertion message%c", "formatted", '!');
     }
 
     /* String */
