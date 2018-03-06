@@ -37,12 +37,12 @@
 #ifndef TRAITS_INCLUDED
 #define TRAITS_INCLUDED
 
-#define TRAITS_VERSION_MAJOR                        0
-#define TRAITS_VERSION_MINOR                        3
+#define TRAITS_VERSION_MAJOR                        3
+#define TRAITS_VERSION_MINOR                        0
 #define TRAITS_VERSION_PATCH                        0
-#define TRAITS_VERSION_SUFFIX                       "rc"
-#define TRAITS_VERSION_IS_RELEASE                   0
-#define TRAITS_VERSION_HEX                          0x000300
+#define TRAITS_VERSION_SUFFIX                       ""
+#define TRAITS_VERSION_IS_RELEASE                   1
+#define TRAITS_VERSION_HEX                          0x030000
 
 #if !(defined(__GNUC__) || defined(__clang__))
 #define __attribute__(...)
