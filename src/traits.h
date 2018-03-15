@@ -38,11 +38,11 @@
 #define TRAITS_INCLUDED
 
 #define TRAITS_VERSION_MAJOR                        3
-#define TRAITS_VERSION_MINOR                        0
+#define TRAITS_VERSION_MINOR                        1
 #define TRAITS_VERSION_PATCH                        0
 #define TRAITS_VERSION_SUFFIX                       ""
 #define TRAITS_VERSION_IS_RELEASE                   1
-#define TRAITS_VERSION_HEX                          0x030000
+#define TRAITS_VERSION_HEX                          0x030100
 
 #if !(defined(__GNUC__) || defined(__clang__))
 #define __attribute__(...)
@@ -173,6 +173,11 @@ __traits_assert(bool condition, size_t line, const char *file, const char *asser
 #define __traits_assert_0(x)                        __traits_assert_x(x, NULL)
 #define __traits_assert_1(x, ...)                   __traits_assert_x(x, __VA_ARGS__)
 #define traits_assert(...)                          __TRAITS_OVERLOAD_ONE(__traits_assert_0, __traits_assert_1, __VA_ARGS__)
+
+#define __assert_that_x(x, ...)                     do { const bool __traits_x = (x); __traits_helper(__TRAITS_TO_STRING(x), eq(true, __traits_x), __VA_ARGS__); } while(false)
+#define __assert_that_0(x)                          __assert_that_x(x, NULL)
+#define __assert_that_1(x, ...)                     __assert_that_x(x, __VA_ARGS__)
+#define assert_that(...)                            __TRAITS_OVERLOAD_ONE(__assert_that_0, __assert_that_1, __VA_ARGS__)
 
 /*
  * Boolean
