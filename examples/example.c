@@ -39,33 +39,23 @@ int main() {
     traits_assert(true);
     traits_assert(true, "My amazing %s assertion message%c", "formatted", '!');
 
-    traits_assert(eq_as(size_t, 1U, 1.35f));
-    traits_assert(eq_as(size_t, 1U, 1.35f), "My amazing %s assertion message%c", "formatted", '!');
+    assert_that(eq_as(size_t, 1U, 1.35f));
+    assert_that(eq_as(size_t, 1U, 1.35f), "My amazing %s assertion message%c", "formatted", '!');
 
-    traits_assert(ne_as(
-                          double, 1L, 1.35f));
-    traits_assert(ne_as(
-                          double, 1L, 1.35f), "My amazing %s assertion message%c", "formatted", '!');
+    assert_that(ne_as(double, 1L, 1.35f));
+    assert_that(ne_as(double, 1L, 1.35f), "My amazing %s assertion message%c", "formatted", '!');
 
-    traits_assert(gt_as(
-                          char, 99, 'a'));
-    traits_assert(gt_as(
-                          char, 99, 'a'), "My amazing %s assertion message%c", "formatted", '!');
+    assert_that(gt_as(char, 99, 'a'));
+    assert_that(gt_as(char, 99, 'a'), "My amazing %s assertion message%c", "formatted", '!');
 
-    traits_assert(ge_as(
-                          unsigned int, 1, 0));
-    traits_assert(ge_as(
-                          unsigned int, 1, 0), "My amazing %s assertion message%c", "formatted", '!');
+    assert_that(ge_as(unsigned int, 1, 0));
+    assert_that(ge_as(unsigned int, 1, 0), "My amazing %s assertion message%c", "formatted", '!');
 
-    traits_assert(lt_as(
-                          long int, -1, 1U));
-    traits_assert(lt_as(
-                          long int, -1, 1U), "My amazing %s assertion message%c", "formatted", '!');
+    assert_that(lt_as(long int, -1, 1U));
+    assert_that(lt_as(long int, -1, 1U), "My amazing %s assertion message%c", "formatted", '!');
 
-    traits_assert(le_as(
-                          long double, -1.5f, 0x10));
-    traits_assert(le_as(
-                          long double, -1.5f, 0x10), "My amazing %s assertion message%c", "formatted", '!');
+    assert_that(le_as(long double, -1.5f, 0x10));
+    assert_that(le_as(long double, -1.5f, 0x10), "My amazing %s assertion message%c", "formatted", '!');
 
     /* Boolean */
     assert_true(true);
@@ -99,9 +89,9 @@ int main() {
     assert_null(NULL);
     assert_null(NULL, "My amazing %s assertion message%c", "formatted", '!');
     {
-        int tmp = 0;
-        assert_not_null(&tmp);
-        assert_not_null(&tmp, "My amazing %s assertion message%c", "formatted", '!');
+        void *foo;
+        assert_not_null(&foo);
+        assert_not_null(&foo, "My amazing %s assertion message%c", "formatted", '!');
     }
 
     /* Memory */

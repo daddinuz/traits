@@ -16,17 +16,18 @@ a custom message in the same way as you would do using printf.
 That means that you can write something like this:
 ```C
 /* Just assert without specifying a message */
-traits_assert(5 == 5);
+assert_that(5 == 5);
 
 /* Assert specifying a message */
 int x = 5, y = 6;
-traits_assert(x == y, "Ops! Expected to be %d got %d", x, y);
+assert_that(x == y, "Ops! Expected to be %d got %d", x, y);
 ```
 
 #### Basic
 
 ```C
 traits_assert(x);
+assert_that(x);
 ```
 
 #### Boolean
