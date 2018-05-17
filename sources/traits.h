@@ -38,11 +38,11 @@
 #define TRAITS_INCLUDED
 
 #define TRAITS_VERSION_MAJOR                        3
-#define TRAITS_VERSION_MINOR                        1
+#define TRAITS_VERSION_MINOR                        2
 #define TRAITS_VERSION_PATCH                        0
 #define TRAITS_VERSION_SUFFIX                       ""
 #define TRAITS_VERSION_IS_RELEASE                   1
-#define TRAITS_VERSION_HEX                          0x030100
+#define TRAITS_VERSION_HEX                          0x030200
 
 #if !(defined(__GNUC__) || defined(__clang__))
 #define __attribute__(...)
@@ -128,10 +128,7 @@
 /*
  * Assertions framework
  */
-static const char *
-traits_version(void);
-
-inline const char *
+static inline const char *
 traits_version(void) {
     return (TRAITS_VERSION_IS_RELEASE || sizeof(TRAITS_VERSION_SUFFIX) <= 1)
            ?
