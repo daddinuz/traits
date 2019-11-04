@@ -28,8 +28,6 @@
 
 #include <traits.h>
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
 int main() {
     /* Basic */
     traits_assert(true);
@@ -85,31 +83,31 @@ int main() {
     assert_null(NULL);
     assert_null(NULL, "My amazing %s assertion message%c", "formatted", '!');
     {
-        void *foo;
+        int foo = 0;
         assert_not_null(&foo);
         assert_not_null(&foo, "My amazing %s assertion message%c", "formatted", '!');
     }
 
     /* Memory */
     {
-        const char e[] = "Hel\0lo!", a[] = "Hel\0lo";
-        assert_memory_equal(min(sizeof(e), sizeof(a)) - 1, e, a);
-        assert_memory_equal(min(sizeof(e), sizeof(a)) - 1, e, a, "My amazing %s assertion message%c", "formatted", '!');
+        const char e[] = "Hel\0lo!", a[] = "Hel\0lo!";
+        assert_memory_equal(e, a, sizeof(e) / sizeof(e[0]) - 1);
+        assert_memory_equal(e, a, sizeof(e) / sizeof(e[0]) - 1, "My amazing %s assertion message%c", "formatted", '!');
     }
     {
-        const char e[] = "Hel\0lo!", a[] = "hel\0lo";
-        assert_memory_not_equal(min(sizeof(e), sizeof(a)) - 1, e, a);
-        assert_memory_not_equal(min(sizeof(e), sizeof(a)) - 1, e, a, "My amazing %s assertion message%c", "formatted", '!');
+        const char e[] = "Hel\0lo!", a[] = "hel\0lo!";
+        assert_memory_not_equal(e, a, sizeof(e) / sizeof(e[0]) - 1);
+        assert_memory_not_equal(e, a, sizeof(e) / sizeof(e[0]) - 1, "My amazing %s assertion message%c", "formatted", '!');
     }
 
     /* String */
     {
-        const char *const e = "Hello", *const a = "Hello";
+        const char e[] = "Hello", a[] = "Hello";
         assert_string_equal(e, a);
         assert_string_equal(e, a, "My amazing %s assertion message%c", "formatted", '!');
     }
     {
-        const char *const e = "Hello!", *const a = "hell0!";
+        const char e[] = "Hello!", a[] = "hell0!";
         assert_string_not_equal(e, a);
         assert_string_not_equal(e, a, "My amazing %s assertion message%c", "formatted", '!');
     }
