@@ -26,23 +26,18 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <memory.h>
 #include <stdbool.h>
-
-
-#ifndef TRAITS_INCLUDED
-#define TRAITS_INCLUDED
-
-#define TRAITS_VERSION_MAJOR                        3
-#define TRAITS_VERSION_MINOR                        2
-#define TRAITS_VERSION_PATCH                        0
-#define TRAITS_VERSION_SUFFIX                       ""
-#define TRAITS_VERSION_IS_RELEASE                   1
-#define TRAITS_VERSION_HEX                          0x030200
 
 #if !(defined(__GNUC__) || defined(__clang__))
 #define __attribute__(...)
@@ -128,20 +123,6 @@
 /*
  * Assertions framework
  */
-static inline const char *
-traits_version(void) {
-    return (TRAITS_VERSION_IS_RELEASE || sizeof(TRAITS_VERSION_SUFFIX) <= 1)
-           ?
-           __TRAITS_TO_STRING(TRAITS_VERSION_MAJOR) "."
-                   __TRAITS_TO_STRING(TRAITS_VERSION_MINOR) "."
-                   __TRAITS_TO_STRING(TRAITS_VERSION_PATCH)
-           :
-           __TRAITS_TO_STRING(TRAITS_VERSION_MAJOR) "."
-                   __TRAITS_TO_STRING(TRAITS_VERSION_MINOR) "."
-                   __TRAITS_TO_STRING(TRAITS_VERSION_PATCH) "-"
-                   TRAITS_VERSION_SUFFIX;
-}
-
 static void
 __traits_assert(bool condition, size_t line, const char *file, const char *assertion, const char *message, ...)
 __attribute__((__format__(__printf__, 5, 6)));
@@ -261,4 +242,6 @@ __traits_assert(bool condition, size_t line, const char *file, const char *asser
 #define __assert_string_not_equal_1(e, a, ...)      __assert_string_not_equal_x(e, a, __VA_ARGS__)
 #define assert_string_not_equal(...)                __TRAITS_OVERLOAD_TWO(__assert_string_not_equal_0, __assert_string_not_equal_1, __VA_ARGS__)
 
-#endif /* TRAITS_INCLUDED */
+#ifdef __cplusplus
+}
+#endif
