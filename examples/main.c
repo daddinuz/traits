@@ -26,14 +26,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "traits.h"
-
+#include <traits.h>
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-/*
- *
- */
 int main() {
     /* Basic */
     traits_assert(true);
