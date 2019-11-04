@@ -9,6 +9,9 @@
     "assertions",
     "assertions-library"
   ],
+  "dependencies": {
+    "daddinuz/trace": "2.0.0"
+  },
   "src": [
     "sources/traits.h"
   ]
