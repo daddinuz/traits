@@ -2,7 +2,7 @@
  * Author: daddinuz
  * email:  daddinuz@gmail.com
  *
- * Copyright (c) 2018 Davide Di Carlo
+ * Copyright (c) 2019 Davide Di Carlo
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
