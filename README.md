@@ -18,7 +18,7 @@ assert_that(5 == 5);
 
 /* Assert specifying a message */
 int x = 5, y = 6;
-assert_that(x == y, "Ops! Expected to be %d got %d", x, y);
+assert_that(x == y, "Ops! Expected: %d, got: %d", x, y);
 ```
 
 #### Basic
@@ -56,8 +56,8 @@ assert_not_null(x);
 #### Memory
 
 ```C
-assert_memory_equal(s, e, a);
-assert_memory_not_equal(s, e, a);
+assert_memory_equal(e, a, s);
+assert_memory_not_equal(e, a, s);
 ```
 
 #### String
