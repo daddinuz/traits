@@ -10,5 +10,8 @@ include_directories(deps)
 # archive
 include_directories(sources)
 
-# Examples
+# examples
 include(examples/build.cmake)
+
+# tests
+include(tests/build.cmake)
