@@ -90,12 +90,12 @@ int main() {
 
     /* Memory */
     {
-        const char e[] = "Hel\0lo!", a[] = "Hel\0lo!";
+        const char e[7] = "Hel\0lo!", a[7] = "Hel\0lo!";
         assert_memory_equal(e, a, sizeof(e) / sizeof(e[0]) - 1);
         assert_memory_equal(e, a, sizeof(e) / sizeof(e[0]) - 1, "My amazing %s assertion message%c", "formatted", '!');
     }
     {
-        const char e[] = "Hel\0lo!", a[] = "hel\0lo!";
+        const char e[7] = "Hel\0lo!", a[7] = "hel\0lo!";
         assert_memory_not_equal(e, a, sizeof(e) / sizeof(e[0]) - 1);
         assert_memory_not_equal(e, a, sizeof(e) / sizeof(e[0]) - 1, "My amazing %s assertion message%c", "formatted", '!');
     }
