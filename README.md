@@ -3,7 +3,7 @@ Traits
 
 Traits is an assertion library written in C99.  
 It's an header only library so you just have to include
-`traits.h` in your code and your ready for bugs hunting. 
+`traits.h` in your code and you are ready for bugs hunting. 
 
 ## Assertion Summary
 
