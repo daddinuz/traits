@@ -1,6 +1,8 @@
 Traits
 ======
 
+[![Build Status](https://travis-ci.org/daddinuz/traits.svg?branch=master)](https://travis-ci.org/daddinuz/traits)
+
 Traits is an assertion library written in C99.  
 It's an header only library so you just have to include
 `traits.h` in your code and you are ready for bugs hunting. 
