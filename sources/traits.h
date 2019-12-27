@@ -38,7 +38,7 @@ extern "C" {
 #include <memory.h>
 #include <stdbool.h>
 
-#if !(defined(__GNUC__) || defined(__clang__))
+#if !defined(__GNUC__)
 #define __attribute__(...)
 #endif
 
